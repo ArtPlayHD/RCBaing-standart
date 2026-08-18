@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Этаж склада | RCBaing</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .floor-header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .floor-title {
+      font-size: 2.2rem;
+      color: var(--accent);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .stat-label {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-top: 12px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+    .resource-list {
+      width: 100%;
+      max-width: 600px;
+    }
+    .resource-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .back-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="floor-header">
+    <h1 class="floor-title">📦 Этаж склада</h1>
+    <p style="color:#aaa">Лимиты, запасы и прогноз заполнения — для тактики без активных боёв</p>
+  </div>
+
+  <div class="stats-grid">
+    <!-- Ресурс 1 -->
+    <div class="stat-card">
+      <div class="stat-label">Еда</div>
+      <div class="stat-value" id="res-food">12 400</div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="bar-food" style="width:62%"></div>
+      </div>
+    </div>
+    <!-- Ресурс 2 -->
+    <div class="stat-card">
+      <div class="stat-label">Древесина</div>
+      <div class="stat-value" id="res-wood">8 900</div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="bar-wood" style="width:44%"></div>
+      </div>
+    </div>
+    <!-- Ресурс 3 -->
+    <div class="stat-card">
+      <div class="stat-label">Камень</div>
+      <div class="stat-value" id="res-stone">5 100</div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="bar-stone" style="width:25%"></div>
+      </div>
+    </div>
+    <!-- Ресурс 4 -->
+    <div class="stat-card">
+      <div class="stat-label">Металл</div>
+      <div class="stat-value" id="res-metal">3 700</div>
+      <div class="progress-bar-bg">
+        <div class="progress-fill" id="bar-metal" style="width:18%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="resource-list">
+    <div class="resource-row">
+      <span>Лимит склада:</span>
+      <span id="limit-total">120 000</span>
+    </div>
+    <div class="resource-row">
+      <span>Занято:</span>
+      <span id="used-total">29 100</span>
+    </div>
+    <div class="resource-row">
+      <span>Свободно:</span>
+      <span id="free-total" style="color:var(--accent)">90 900</span>
+    </div>
+    <div class="resource-row">
+      <span>Прогноз заполнения:</span>
+      <span id="days-to-fill">~7 дней</span>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="history.back()">← Назад в меню</button>
+
+  <script>
+    // Простая логика для демонстрации (можно заменить на реальные данные из игры)
+    function updateStats() {
+      const food = localStorage.getItem('meat'), wood = 10K, stone = 1M, metal = 1K;
+      const limit = 120000;
+      const used = food + wood + stone + metal;
+      const free = limit - used;
+      const fillPercent = (used / limit) * 100;
+
+      document.getElementById('res-food').textContent = food.toLocaleString();
+      document.getElementById('res-wood').textContent = wood.toLocaleString();
+      document.getElementById('res-stone').textContent = stone.toLocaleString();
+      document.getElementById('res-metal').textContent = metal.toLocaleString();
+
+      document.getElementById('limit-total').textContent = limit.toLocaleString();
+      document.getElementById('used-total').textContent = used.toLocaleString();
+      document.getElementById('free-total').textContent = free.toLocaleString();
+
+      // Прогноз (пример: +4200 в день)
+      const dailyGain = 4200;
+      const days = Math.ceil(free / dailyGain);
+      document.getElementById('days-to-fill').textContent = '~' + days + ' дней';
+
+      // Прогресс-бары
+      document.getElementById('bar-food').style.width = ((food/limit)*100).toFixed(1) + '%';
+      document.getElementById('bar-wood').style.width = ((wood/limit)*100).toFixed(1) + '%';
+      document.getElementById('bar-stone').style.width = ((stone/limit)*100).toFixed(1) + '%';
+      document.getElementById('bar-metal').style.width = ((metal/limit)*100).toFixed(1) + '%';
+    }
+
+    updateStats();
+  </script>
+  <script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba',
+	  'rcbaing': '#171717'
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+</body>
+</html>

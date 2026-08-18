@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Ваш профиль — RCBaing</title>
+  <!-- Если у тебя есть style.css — оставь эту строку. Если нет — всё равно будет красиво благодаря стилям ниже -->
+  <link rel="stylesheet" type="text/css" href="style.css">
+  
+  <style>
+:root {
+  --bg: #0f1115;
+  --panel: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #ff6b81;
+  --text: #ffffff;
+  --muted: #a0a0b0;
+  --error: #ff4757;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+h1, h2, h3, h4 {
+  color: var(--text);
+}
+
+.gameinfo {
+  color: var(--muted);
+  margin: 4px 0;
+}
+
+/* Прогресс-бар */
+.progress-container {
+  margin: 24px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 8px;
+}
+
+.progress-bar {
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+#progressFill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform 0.1s, background 0.2s;
+  transform: translate(10%)
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+#option {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+#Clear {
+  background: var(--error);
+  color: white;
+  margin-top: 12px;
+}
+
+#Clear:hover {
+  background: #ff3344;
+}
+
+/* Плавающая кнопка «Уютный уголок» */
+.cozy-float-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 1.4rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cozy-float-btn:hover {
+  background: var(--accent);
+  color: black;
+  transform: scale(1.1);
+}
+
+/* Попапы (dialog) */
+dialog {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 400px;
+  margin: auto;
+  min-width: 300px;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Уютный уголок */
+#userCozyCorner {
+  margin-top: 40px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+#userCozyCorner h3 {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+/* Атмосфера комнаты */
+.mood-room select {
+  width: 100%;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+}
+
+.mood-room select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Аватар */
+#You {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+
+/* Разделитель */
+hr {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 20px 0;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 480px) {
+  .cozy-float-btn {
+    width: 48px;
+    height: 48px;
+    bottom: 15px;
+    right: 15px;
+  }
+  .container {
+    padding: 0 12px;
+  }
+}
+</style>
+<body id="Your_page_body">
+  <div class="container">
+    <h1>Ваш профиль</h1>
+
+    <!-- Попап достижения (показывается при первом заходе) -->
+    <dialog id="myDialog" open>
+      <h2>Достижение выполнено!</h2>
+      <p>«Милый дом» открыт. Теперь ты можешь менять атмосферу комнаты и следить за прогрессом.</p>
+      <button id="Next" onclick="document.getElementById('myDialog').close()">Продолжить...</button>
+    </dialog>
+
+    <img id="You" src="You.png" alt="Аватар" style="width: 120px; height: 120px; border-radius: 12px; object-fit: cover; margin-bottom: 12px;">
+
+    <h2 id="Name" class="gameinfo"></h2>
+    <h3 id="Mail" class="gameinfo"></h3>
+    <h3 id="PH" class="gameinfo"></h3>
+
+    <div class="progress-container">
+      <h4>Прогресс «Милого дома»</h4>
+      <div class="progress-bar">
+        <div id="progressFill" class="fill"></div>
+      </div>
+      <p id="progressText">0%</p>
+    </div>
+
+    <h4>Последний вход:</h4>
+    <p id="lastLoginDisplay">Нет данных</p>
+
+    <div class="mood-room">
+      <h4>✨ Атмосфера комнаты</h4>
+      <select id="moodSelect">
+        <option value="cozy">Уютная (по умолчанию)</option>
+        <option value="party">Праздничная</option>
+        <option value="calm">Спокойная</option>
+      </select>
+      <p style="font-size: 0.85rem; color: var(--muted); margin-top: 6px;">Влияет на фон и эффекты в «Уютном уголке».</p>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 20px 0;">
+
+    <button id="option" onclick="window.location.href='option_your_page.html'">Настройки</button>
+	<h1>	</h1>
+    <button id="Clear" onclick="CD()">Стереть ВСЕ данные</button>
+
+    <p style="font-size: 0.75rem; color: var(--muted); margin-top: 8px;">
+      Данные хранятся в localStorage браузера. Удаление необратимо.
+    </p>
+  </div>
+
+  <!-- Попап подтверждения удаления -->
+  <dialog id="myDialogClear">
+    <h2>Подтвердите действие</h2>
+    <p>Это действие <strong>НАВСЕГДА</strong> удалит:</p>
+    <ul style="margin: 12px 0 16px 16px; color: var(--text);">
+      <li>Прогресс «Милого дома» и достижения</li>
+      <li>Ник, почту, телефон</li>
+      <li>Настройки атмосферы и темы</li>
+      <li>Данные Ant Legion (ник, статус, альянс)</li>
+    </ul>
+    <p style="color: var(--error); font-weight: bold;">Восстановить будет невозможно.</p>
+    <div style="display: flex; gap: 10px;">
+      <button id="Ok" onclick="DeleteData()" style="background: var(--accent); color: black; flex: 1;">Продолжить</button>
+      <button id="Cancel" onclick="document.getElementById('myDialogClear').close()" style="flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text);">Отмена</button>
+    </div>
+  </dialog>
+
+  <!-- Уютный уголок (только кнопка) -->
+  <div id="userCozyCorner" style="margin-top: 40px; padding: 24px; background: rgba(255, 255, 255, 0.04); border-radius: 16px; border: 1px solid var(--border);">
+    <h3 style="margin-top: 0; color: var(--accent);">Уютный уголок</h3>
+    <p style="color: var(--muted);">Здесь живёт атмосфера твоего «Милого дома».</p>
+
+    
+  </div>
+<div>
+  <!-- Плавающая кнопка -->
+  <button class="cozy-float-btn" title="Милый уголок" onclick="window.location.href='Your.html'">🏠</button>
+</div>
+</body>
+<script>
+  // --- Инициализация при загрузке страницы ---
+  document.addEventListener('DOMContentLoaded', () => {
+    initProfile();
+    updateProgress();
+    setLastLogin();
+    setupMoodSelect();
+    setupButtons();
+  });
+
+  // --- Профиль: вывод данных из localStorage ---
+  function initProfile() {
+    const nameEl = document.getElementById('Name');
+    const mailEl = document.getElementById('Mail');
+    const phEl = document.getElementById('PH');
+
+    if (nameEl) nameEl.textContent = localStorage.getItem('name') || '';
+    if (mailEl) mailEl.textContent = 'Почта: ' + (localStorage.getItem('mail') || '');
+    if (phEl) phEl.textContent = 'Телефон: ' + (localStorage.getItem('PH') || '');
+  }
+
+  // --- Прогресс «Милого дома»: считаем по заполненным полям ---
+  function updateProgress() {
+    let filled = 0;
+    const fields = ['name', 'mail', 'PH', 'antLegionNick'];
+    fields.forEach(key => {
+      if (localStorage.getItem(key)) filled += 25;
+    });
+
+    const fillEl = document.getElementById('progressFill');
+    const textEl = document.getElementById('progressText');
+    if (fillEl) fillEl.style.width = filled + '%';
+    if (textEl) textEl.textContent = filled + '%';
+  }
+
+  // --- Последний вход: сохраняем и показываем ---
+  function setLastLogin() {
+    const display = document.getElementById('lastLoginDisplay');
+    if (display) {
+      const now = new Date().toLocaleString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      localStorage.setItem('lastLogin', now);
+      display.textContent = now;
+    }
+  }
+
+  // --- Атмосфера комнаты: запоминаем выбор и можно расширять логику ---
+  function setupMoodSelect() {
+    const moodSelect = document.getElementById('moodSelect');
+    if (!moodSelect) return;
+
+    moodSelect.addEventListener('change', (e) => {
+      localStorage.setItem('roomMood', e.target.value);
+      console.log('Атмосфера установлена:', e.target.value);
+      // Сюда позже можно добавить смену фона/эффектов по mood
+    });
+
+    const savedMood = localStorage.getItem('roomMood') || 'cozy';
+    moodSelect.value = savedMood;
+  }
+
+  // --- Кнопки и логика ---
+  function setupButtons() {
+    // Удаление данных: сначала показываем попап, потом confirm
+    window.CD = function() {
+      const dialog = document.getElementById('myDialogClear');
+      if (dialog) dialog.showModal();
+    };
+
+    window.DeleteData = function() {
+      if (confirm('Вы уверены? Все данные будут удалены навсегда.')) {
+        localStorage.clear();
+        location.reload();
+      } else {
+        const dialog = document.getElementById('myDialogClear');
+        if (dialog) dialog.close();
+      }
+    };
+
+    // Магазин Любви: пока заглушка, потом можно открыть модалку/страницу
+    const loveShopBtn = document.getElementById('loveShopBtn');
+    if (loveShopBtn) {
+      loveShopBtn.addEventListener('click', () => {
+        alert('💍 Магазин Любви: функционал в разработке.\n(Здесь будет обмен уюта на любовь и покупка декора.)');
+      });
+    }
+
+    // Плавающая кнопка: скролл к «Уютному уголку»
+    window.scrollToCozy = function() {
+      const corner = document.getElementById('userCozyCorner');
+      if (corner) {
+        corner.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  }
+</script>
+
+

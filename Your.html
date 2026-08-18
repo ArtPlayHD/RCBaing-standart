@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Уютный уголок — RCBaing</title>
+  <style>
+    :root {
+      --bg-dark: #0f1115;
+      --panel-bg: rgba(12, 14, 18, 0.85);
+      --accent: #3FBF7B;
+      --gold: #fad996;
+      --text-main: #e0e0e0;
+      --text-muted: #888;
+      --overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* Фоновая анимация (мягкий градиент) */
+    .cozy-bg-anim {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, #1a1f26 0%, #0f1115 100%);
+      animation: cozyPulse 12s ease-in-out infinite alternate;
+    }
+	
+    @keyframes cozyPulse {
+      0% { filter: brightness(0.98); }
+      100% { filter: brightness(1.01); }
+    }
+
+    .cozy-corner-zone {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 32px;
+      background: var(--panel-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    h2 { margin-top: 0; color: var(--gold); text-align: center; }
+    p.subtitle { text-align: center; color: var(--text-muted); max-width: 600px; margin: 0 auto 24px; }
+.moon-cycle-block {
+  text-align: center;
+  margin: 20px 0;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.moon-icon {
+  font-size: 48px;
+  line-height: 1;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.moon-label {
+  font-weight: bold;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.moon-desc {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+/* Анимация пульсации луны в фазе «Полная» */
+.moon-full-pulse {
+  animation: moonPulse 2s infinite ease-in-out;
+}
+@keyframes moonPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Бонус-плашка (не модальное окно, просто плашка сверху) */
+.moon-bonus-toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: #3FBF7B;
+  color: #000;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(63,191,123,0.4);
+  z-index: 9998;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: none;
+  font-weight: bold;
+}
+.moon-bonus-toast.show {
+  transform: translateX(-50%);
+  opacity: 1;
+}
+
+    /* Статистика */
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      text-align: center;
+      padding: 18px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      min-width: 110px;
+    }
+    .stat-value {
+      font-size: 26px;
+      font-weight: bold;
+      color: var(--gold);
+    }
+    .stat-label {
+      display: block;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-size: 14px;
+    }
+
+    /* Кот и погладить */
+    .pet-area {
+      text-align: center;
+      margin: 30px 0;
+    }
+    .cat-emoji {
+      font-size: 72px;
+      cursor: pointer;
+      transition: transform 0.1s;
+      user-select: none;
+    }
+    .cat-emoji:active { transform: scale(0.92); }
+    .pet-btn {
+      margin-top: 12px;
+      padding: 14px 32px;
+      background: #ffeb3b;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pet-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(255, 235, 59, 0.3);
+    }
+
+    /* Пассивный бонус */
+    .passive-bonus-block {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(63, 191, 123, 0.08);
+      border: 1px dashed rgba(63, 191, 123, 0.4);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .bonus-timer {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--accent);
+      margin: 12px 0;
+    }
+    .bonus-status {
+      color: var(--text-muted);
+      font-size: 0.9em;
+    }
+
+    /* Прогресс уюта */
+    .comfort-progress-wrap {
+      margin-top: 24px;
+      text-align: center;
+    }
+    .progress-label { color: var(--text-muted); font-size: 0.9em; margin-bottom: 6px; display: block; }
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3FBF7B, #fad996);
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    /* Дневник мыслей */
+    .diary-section {
+      margin-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 20px;
+    }
+    .diary-label { font-weight: bold; color: var(--gold); margin-bottom: 8px; }
+    textarea.diary-input {
+      width: 100%;
+      min-height: 80px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      resize: vertical;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    .diary-save-btn {
+      margin-top: 8px;
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .diary-note {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      font-size: 0.95em;
+      color: var(--text-muted);
+    }
+
+    /* Кнопка возврата в магазин */
+    .back-to-shop-btn {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+	.light-control-block {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.light-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.light-btn {
+  padding: 10px 18px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-main);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.light-btn:hover {
+  background: rgba(255,255,255,0.12);
+  transform: translateY(-1px);
+}
+
+.light-btn.active {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 12px rgba(63,191,123,0.3);
+}
+
+/* Режимы освещения через CSS-переменные */
+:root[data-light="warm"] {
+  --bg-dark: #0f1115;
+  --panel-bg: rgba(18, 14, 12, 0.85);
+  --accent: #d97a3d;
+  --gold: #fcd9a0;
+}
+:root[data-light="moon"] {
+  --bg-dark: #0b1016;
+  --panel-bg: rgba(10, 13, 20, 0.88);
+  --accent: #5a7fbd;
+  --gold: #bce4ff;
+}
+:root[data-light="fire"] {
+  --bg-dark: #120a08;
+  --panel-bg: rgba(24, 12, 8, 0.85);
+  --accent: #c95b2e;
+  --gold: #ffaa66;
+}
+.space-control-block {
+  text-align: center;
+  margin: 24px 0;
+}
+
+.space-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.space-btn {
+  padding: 10px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.space-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.space-btn.active {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 4px 12px rgba(63, 191, 123, 0.3);
+}
+
+.space-btn[data-space="attic"] {
+  color: #d4af37;
+}
+
+.space-btn[data-space="basement"] {
+  color: #7f8c8d;
+}
+
+/* Пространство: Уютный уголок (по умолчанию) */
+:root[data-space="cozy"] {
+  --bg-dark: #0f1115;
+  --panel-bg: rgba(12, 14, 18, 0.85);
+  --accent: #3FBF7B;
+  --gold: #fad996;
+  --text-main: #e0e0e0;
+  --text-muted: #888;
+}
+
+/* Пространство: Чердак (светло, воздух, пыль в лучах) */
+:root[data-space="attic"] {
+  --bg-dark: #f5f6fa;
+  --panel-bg: rgba(255, 255, 255, 0.75);
+  --accent: #d4af37;
+  --gold: #ffeaa7;
+  --text-main: #2d3436;
+  --text-muted: #636e72;
+}
+
+/* Наклон панелей и текста на чердаке — эффект «под крышей» */
+:root[data-space="attic"] .cozy-corner-zone,
+:root[data-space="attic"] .panel-card {
+  transform: skewY(-3deg);
+}
+:root[data-space="attic"] h2,
+:root[data-space="attic"] .diary-note,
+:root[data-space="attic"] button {
+  transform: skewY(3deg); /* компенсируем наклон текста */
+}
+
+/* Пространство: Подвал (темно, тяжело, сырость) */
+:root[data-space="basement"] {
+  --bg-dark: #0f0b0d;
+  --panel-bg: rgba(10, 8, 12, 0.92);
+  --accent: #7f8c8d;
+  --gold: #a9a9b3;
+  --text-main: #e0e0e0;
+  --text-muted: #888;
+}
+
+/* Лёгкая «сырость» фона в подвале — едва заметная текстура через повторяющиеся градиенты */
+:root[data-space="basement"] #bgLayer {
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px, 30px 30px;
+}
+
+/* Эффект «капающей воды» в подвале (точечные блики) */
+.drop-spot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+:root[data-space="basement"] .drop-spot {
+  animation: dropFall 3s infinite linear;
+}
+
+@keyframes dropFall {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  10% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* Затемнение краёв для эффекта замкнутого пространства в подвале */
+:root[data-space="basement"] .panel-card {
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+.booster-block {
+  text-align: center;
+  margin: 16px 0;
+}
+
+.booster-btn {
+  padding: 10px 20px;
+  border: none;
+  background: #ff6b6b;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.booster-btn:hover {
+  background: #ee5253;
+  transform: translateY(-1px);
+}
+
+.booster-btn.active {
+  background: #3FBF7B;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(63, 191, 123, 0.4);
+}
+
+.booster-timer {
+  text-align: center;
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+.back-to-shop-btn:hover { border-color: var(--gold); color: var(--gold); }
+  </style>
+</head>
+<body>
+
+
+
+
+
+
+
+<div class="cozy-bg-anim"></div>
+
+<div id="userCozyCorner" class="cozy-corner-zone">
+  <h2>🏠 Уютный уголок</h2>
+  <p class="subtitle">Здесь тихо. Можно просто посидеть, погладить кота и подумать о хорошем.</p>
+
+  <!-- Статистика -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-value" id="loveCountCorner">0</span>
+      <span class="stat-label">❤️ Любовь</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="comfortLevel">0</span>
+      <span class="stat-label">🧸 Уют</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value" id="wardBonus">0</span>
+      <span class="stat-label">⏳ Бонус/мин</span>
+    </div>
+  </div>
+
+  <!-- Кот -->
+  <div class="pet-area">
+    <div class="cat-emoji" id="catEmoji">🐱</div>
+    <h3>Погладь кота</h3>
+    <p style="font-size:0.9em;">Каждое поглаживание даёт +1 ❤️ и немного уюта.</p>
+    <button id="petCatBtn" class="pet-btn">Погладить кота</button>
+  </div>
+  
+<div class="double-tap-hint" style="
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: #888;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+">
+  Попробуй дважды кликнуть по коту — увидишь особый эффект!
+</div>
+
+  <!-- Пассивный бонус (от Тихого оберега) -->
+  <div class="passive-bonus-block">
+    <div>Пассивный бонус от «Тихого оберега»:</div>
+    <div class="bonus-timer" id="bonusTimer">+1 ❤️ / мин</div>
+    <div class="bonus-status" id="bonusStatus">Бонус активен, пока ты в уголке.</div>
+  </div>
+ <div class="booster-block">
+  <button type="button" id="boosterBtn" class="booster-btn">⚡ Ускоритель: ВКЛ</button>
+  <div id="boosterTimer" class="booster-timer" style="display:none; margin-top:6px; font-size:0.85em; color:var(--gold)"></div>
+</div>
+
+
+  <!-- Прогресс уюта -->
+  <div class="comfort-progress-wrap">
+    <span class="progress-label">Уровень уюта (заполни, чтобы открыть бонус)</span>
+    <div class="progress-bar"><div class="progress-fill" id="comfortFill"></div></div>
+  </div>
+<div class="light-control-block">
+  <span style="font-size: 0.9em; color: var(--text-muted); display: block; margin-bottom: 8px;">
+    Освещение:
+  </span>
+  <div class="light-buttons">
+    <button type="button" class="light-btn active" data-mode="warm">Тёплый</button>
+    <button type="button" class="light-btn" data-mode="moon">Лунный</button>
+    <button type="button" class="light-btn" data-mode="fire">Камин</button>
+  </div>
+</div>
+
+  <!-- Дневник мыслей -->
+  <div class="diary-section">
+    <span class="diary-label">📝 Дневник мыслей</span>
+    <textarea class="diary-input" id="diaryInput" placeholder="Запиши одну спокойную мысль…"></textarea>
+    <button class="diary-save-btn" id="saveDiaryBtn">Сохранить мысль</button>
+    <div id="diaryNotes" class="diary-notes-list"></div>
+  </div>
+<div class="moon-cycle-block">
+  <div class="moon-icon" id="moonIcon">🌙</div>
+  <div class="moon-label">Фаза уюта: <span id="moonPhaseText">Спокойный полумесяц</span></div>
+  <div class="moon-desc" id="moonDesc">Тишина накапливается — скоро будет полная луна.</div>
+</div>
+
+
+  <!-- Кнопка возврата в магазин -->
+  <button id="backToShopBtn" class="back-to-shop-btn">← Магазин Любви</button>
+  <button id="backToShopBtn" class="back-to-house-btn">← Вернуться в милый домик</button>
+</div>
+<div class="space-control-block">
+
+
+  <div id="spaceLockHint" class="space-lock" style="
+    display: none;
+    margin-top: 6px;
+    font-size: 0.85em;
+    color: #f19c12;
+    text-align: center;
+  ">
+    Нужно больше уюта, чтобы открыть это пространство.
+  </div>
+  
+</div>
+
+
+
+
+<script>
+  
+	
+  // --- Инициализация ---
+  let love = parseInt(localStorage.getItem('rcbaing_love') || '0');
+  let comfort = parseInt(localStorage.getItem('rcbaing_comfort') || '0');
+  const isWardActive = localStorage.getItem('rcbaing_shop_bought_quiet_ward') === 'true';
+
+  function saveState() {
+    localStorage.setItem('rcbaing_love', love);
+    localStorage.setItem('rcbaing_comfort', comfort);
+  }
+
+  function updateLove() {
+    const el = document.getElementById('loveCountCorner');
+    if (el) el.textContent = love;
+  }
+  function updateComfort() {
+    const elVal = document.getElementById('comfortLevel');
+    const elFill = document.getElementById('comfortFill');
+    if (elVal) elVal.textContent = comfort;
+    if (elFill) {
+      const percent = Math.min(comfort, 999); // максимум 100%
+      elFill.style.width = percent + '%';
+    }
+  }
+  updateLove();
+  updateComfort();
+
+  // --- Погладить кота ---
+  document.getElementById('petCatBtn').addEventListener('click', () => {
+    love += 1;
+    comfort = Math.min(999999, comfort + 1); // +5 уюта за поглаживание
+    saveState();
+    updateLove();
+    updateComfort();
+    animateCat();
+  });
+
+  document.getElementById('catEmoji').addEventListener('click', () => {
+    // То же действие, что и по кнопке
+    document.getElementById('petCatBtn').click();
+  });
+
+  function animateCat() {
+    const cat = document.getElementById('catEmoji');
+    cat.style.transform = 'scale(1.1)';
+    setTimeout(() => cat.style.transform = '', 150);
+  }
+
+  // --- Пассивный бонус: +1 ❤️/мин (если куплен оберег) ---
+  const bonusTimerEl = document.getElementById('bonusTimer');
+  const bonusStatusEl = document.getElementById('bonusStatus');
+
+  if (isWardActive) {
+    setInterval(() => {
+      love += 1;
+      saveState();
+      updateLove();
+      console.log('+1 ❤️ от пассивного бонуса');
+    }, 60000);
+
+    if (bonusTimerEl) bonusTimerEl.textContent = '+1 ❤️ / мин';
+    if (bonusStatusEl) bonusStatusEl.textContent = 'Бонус активен. Уютный уголок работает.';
+  } else {
+    if (bonusTimerEl) bonusTimerEl.textContent = 'Не куплен';
+    if (bonusStatusEl) bonusStatusEl.textContent = 'Купи «Тихий оберег» в магазине, чтобы получать пассивный бонус.';
+  }
+
+  // --- Дневник мыслей ---
+  const diaryInput = document.getElementById('diaryInput');
+  const saveDiaryBtn = document.getElementById('saveDiaryBtn');
+  const diaryNotes = document.getElementById('diaryNotes');
+
+  function loadDiary() {
+    const notes = JSON.parse(localStorage.getItem('rcbaing_diary') || '[]');
+    diaryNotes.innerHTML = '';
+    notes.slice(-5).reverse().forEach(note => {
+      const div = document.createElement('div');
+      div.className = 'diary-note';
+      div.textContent = note;
+      diaryNotes.appendChild(div);
+    });
+  }
+
+  saveDiaryBtn.addEventListener('click', () => {
+    const text = diaryInput.value.trim();
+    if (!text) return;
+
+    const notes = JSON.parse(localStorage.getItem('rcbaing_diary') || '[]');
+    notes.push(text);
+    localStorage.setItem('rcbaing_diary', JSON.stringify(notes));
+
+    diaryInput.value = '';
+    loadDiary();
+  });
+
+  loadDiary();
+
+  // --- Кнопка возврата в магазин ---
+  document.getElementById('backToShopBtn').addEventListener('click', () => {
+    const shop = document.getElementById('loveShop');
+    if (shop) {
+      shop.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = 'Shop_love.html';
+    }
+  });
+  let audioCtx = null;
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playCatWhisper() {
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAt(350, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(280, audioCtx.currentTime + 0.3);
+
+  gain.gain.setValueAt(0.03, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + 0.4);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.4);
+}
+
+// В обработчик поглаживания добавь:
+// playCatWhisper();
+const worryWords = ['грустно', 'плохо', 'не хочу', 'боюсь', 'тяжело'];
+
+function checkMood() {
+  const input = document.getElementById('diaryInput');
+  const text = (input.value || '').toLowerCase();
+  const hasWorry = worryWords.some(w => text.includes(w));
+
+  const container = document.querySelector('.diary-section');
+  let hint = container.querySelector('.mood-hint');
+
+  if (!hint && hasWorry) {
+    hint = document.createElement('div');
+    hint.className = 'mood-hint';
+    hint.style.marginTop = '8px';
+    hint.style.padding = '10px';
+    hint.style.background = 'rgba(243, 156, 18, 0.1)';
+    hint.style.borderLeft = '4px solid #f19c12';
+    hint.style.color = '#f19c12';
+    hint.style.fontSize = '0.9em';
+    hint.textContent = 'Иногда полезно просто выдохнуть. Хочешь записать одну спокойную мысль?';
+    container.insertBefore(hint, document.getElementById('saveDiaryBtn'));
+  } else if (hint && !hasWorry) {
+    hint.remove();
+  }
+}
+
+document.getElementById('diaryInput').addEventListener('input', checkMood);
+// --- МЕХАНИКА: лунный цикл ---
+const MOON_INTERVAL_MS = 15 * 60 * 1000; // 15 минут на фазу
+const MOONS = [
+  { name: 'Спокойный полумесяц', emoji: '🌙', color: '#88aaff', bonus: 0 },
+  { name: 'Растущая луна', emoji: '🌘', color: '#aaccff', bonus: 1 },
+  { name: 'Яркая четверть', emoji: '🌗', color: '#cceeff', bonus: 2 },
+  { name: 'Прибывающая луна', emoji: '🌖', color: '#eef5ff', bonus: 3 },
+  { name: 'Полная луна', emoji: '🌕', color: '#ffffcc', bonus: 5 },
+];
+
+let moonIndex = parseInt(localStorage.getItem('rcbaing_moon_index') || '0');
+let moonTimer;
+
+function updateMoonCycle() {
+  const moonData = MOONS[moonIndex % MOONS.length];
+  const iconEl = document.getElementById('moonIcon');
+  const textEl = document.getElementById('moonPhaseText');
+  const descEl = document.getElementById('moonDesc');
+
+  if (iconEl) {
+    iconEl.textContent = moonData.emoji;
+    iconEl.className = 'moon-icon';
+    if (moonData.name.includes('Полная')) {
+      iconEl.classList.add('moon-full-pulse');
+    } else {
+      iconEl.classList.remove('moon-full-pulse');
+    }
+    // Меняем цвет фона зоны под луну (тонко, через тень/градиент можно, но тут проще через стиль)
+    const zone = document.getElementById('userCozyCorner');
+    if (zone) zone.style.boxShadow = `0 10px 30px ${moonData.color}`;
+  }
+  if (textEl) textEl.textContent = moonData.name;
+  if (descEl) descEl.textContent = `Тишина накапливается. Бонус фазы: +${moonData.bonus} ❤️`;
+
+  // Сохраняем индекс
+  localStorage.setItem('rcbaing_moon_index', moonIndex);
+}
+
+// Переход к следующей фазе
+function nextMoonPhase() {
+  moonIndex++;
+  updateMoonCycle();
+  checkMoonBonus(); // проверяем, положен ли бонус за совпадение
+}
+
+// Проверка бонуса: если уровень уюта кратен номеру фазы — даём бонус
+function checkMoonBonus() {
+  const moonData = MOONS[moonIndex % MOONS.length];
+  // Бонус, если комфорт делится на номер фазы (или просто при «Полной луне»)
+  if (moonData.name.includes('Полная луна')) {
+    const bonus = moonData.bonus;
+    love += bonus;
+    comfort = Math.min(100, comfort + bonus * 3);
+    saveState();
+    updateLove();
+    updateComfort();
+    showMoonBonusToast(`✨ Полная луна! Бонус: +${bonus} ❤️ и +${bonus * 3} уюта!`);
+  }
+}
+
+function showMoonBonusToast(message) {
+  let toast = document.getElementById('moonBonusToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'moonBonusToast';
+    toast.className = 'moon-bonus-toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// Запускаем цикл лунных фаз
+function startMoonCycle() {
+  updateMoonCycle(); // сразу показываем текущую фазу
+  moonTimer = setInterval(nextMoonPhase, MOON_INTERVAL_MS);
+}
+startMoonCycle();
+
+// При загрузке страницы восстанавливаем фазу и продолжаем цикл
+(function() {
+  // Если страница была открыта дольше интервала — можно форсировать переход,
+  // но для простоты оставляем как есть: фаза «живёт» по реальному времени только в рамках сессии.
+  startMoonCycle();
+})();
+// --- МЕХАНИКА: выбор освещения ---
+function setLightMode(mode) {
+  const root = document.documentElement;
+  root.setAttribute('data-light', mode);
+
+  // Обновляем активные кнопки
+  document.querySelectorAll('.light-btn').forEach(btn => {
+    const btnMode = btn.getAttribute('data-mode');
+    if (btnMode === mode) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  localStorage.setItem('rcbaing_light_mode', mode);
+}
+
+// Инициализация освещения при загрузке
+(function() {
+  const savedMode = localStorage.getItem('rcbaing_light_mode') || 'warm';
+  setLightMode(savedMode);
+})();
+
+// Слушатели на кнопки
+document.querySelectorAll('.light-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.getAttribute('data-mode');
+    setLightMode(mode);
+  });
+});
+// --- МЕХАНИКА: Ускоритель прогресса ---
+
+const BOOSTER_DURATION = 30; // секунд
+let boosterActive = false;
+let boosterTimerId;
+let boosterEndTime;
+
+function startBooster() {
+  if (boosterActive) return;
+
+  boosterActive = true;
+  const now = Date.now();
+  boosterEndTime = now + (BOOSTER_DURATION * 1000);
+
+  // Обновляем кнопку
+  const btn = document.getElementById('boosterBtn');
+  const timerEl = document.getElementById('boosterTimer');
+  if (btn) btn.classList.add('active');
+  if (timerEl) {
+    timerEl.style.display = 'block';
+    updateBoosterTimer();
+  }
+
+  localStorage.setItem('rcbaing_booster_active', 'true');
+  localStorage.setItem('rcbaing_booster_end', boosterEndTime);
+
+  // Запускаем отсчёт
+  boosterTimerId = setInterval(updateBoosterTimer, 1000);
+}
+
+function stopBooster(force = false) {
+  if (!boosterActive && !force) return;
+  boosterActive = false;
+
+  clearInterval(boosterTimerId);
+
+  const btn = document.getElementById('boosterBtn');
+  const timerEl = document.getElementById('boosterTimer');
+  if (btn) btn.classList.remove('active');
+  if (timerEl) timerEl.style.display = 'none';
+
+  localStorage.removeItem('rcbaing_booster_active');
+  localStorage.removeItem('rcbaing_booster_end');
+}
+
+function updateBoosterTimer() {
+  const now = Date.now();
+  const remaining = Math.max(0, Math.ceil((boosterEndTime - now) / 1000));
+  const timerEl = document.getElementById('boosterTimer');
+
+  if (timerEl) {
+    if (remaining > 0) {
+      timerEl.textContent = `Осталось: ${String(remaining).padStart(2, '0')} сек`;
+    } else {
+      stopBooster();
+    }
+  }
+}
+
+// Восстановление ускорителя при перезагрузке
+(function() {
+  const savedActive = localStorage.getItem('rcbaing_booster_active') === 'true';
+  const savedEnd = parseInt(localStorage.getItem('rcbaing_booster_end') || '0', 10);
+  const now = Date.now();
+
+  if (savedActive && savedEnd > now) {
+    boosterActive = true;
+    boosterEndTime = savedEnd;
+    const btn = document.getElementById('boosterBtn');
+    const timerEl = document.getElementById('boosterTimer');
+    if (btn) btn.classList.add('active');
+    if (timerEl) {
+      timerEl.style.display = 'block';
+      boosterTimerId = setInterval(updateBoosterTimer, 1000);
+      updateBoosterTimer();
+    }
+  } else {
+    stopBooster(); // на случай, если время вышло
+  }
+})();
+
+// Слушатель кнопки
+document.getElementById('boosterBtn').addEventListener('click', () => {
+  if (boosterActive) {
+    // Если уже активен — можно либо продлить, либо просто ничего не делать. Здесь — ничего.
+    return;
+  }
+  startBooster();
+});
+
+// --- ИНТЕГРАЦИЯ: как использовать ускоритель при поглаживании ---
+// Найди свою функцию поглаживания (или обработчик клика по коту) и добавь туда проверку:
+
+/*
+  Пример (замени свой текущий обработчик поглаживания на этот шаблон):
+*/
+function petCat() {
+  // Обычная награда
+  let loveBonus = 1;
+  let comfortBonus = 5;
+
+  // Если ускоритель активен — умножаем награду
+  if (boosterActive) {
+    loveBonus *= 3;
+    comfortBonus *= 3;
+  }
+
+  love += loveBonus;
+  comfort = Math.min(100, comfort + comfortBonus);
+
+  saveState();
+  updateLove();
+  updateComfort();
+
+  // Визуальные эффекты (тёплые пятна, анимация и т.п.)
+  createWarmSpot();
+  playCatWhisper(); // если подключён звук
+}
+
+// Если у тебя уже есть обработчик клика на кота — просто вставь внутрь него проверку `if (boosterActive)`
+// и умножь бонусы. Например:
+/*
+const catEmoji = document.getElementById('catEmoji');
+catEmoji.addEventListener('click', () => {
+  petCat(); // вызов функции выше
+});
+*/
+
+</script>
+
+</body>
+</html>
+
