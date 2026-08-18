@@ -1,0 +1,35 @@
+<!DOCTYPE>
+<html>
+<link rel="stylesheet" type="text/css"href="style.css">
+<button id="SAdventure"onclick="Adventure()">Начать!</button>
+<button id="CNM" onclick="mods()">Ввести код модификации</button>
+<script>
+function Adventure(){   
+    var hard=prompt("Выбери сложность:просто,нормально или хард")
+    if (hard=='просто'){
+        var gamer=prompt("Выбери персонажа или имя","ArtPlayHD");
+        var monster=prompt("Выбери любимого монстра","Скелетон");
+        window.location.href='Game3HARD.html'}
+    if (hard=='нормально'){window.location.href='Medium.html'}
+}
+if(localStorage.getItem('open/close')=='0'){
+    window.alert("Страница закрыта.")
+    window.location.href='Page_close.html'
+}
+function mods(){
+    var mod= prompt ("Введи код модификации");
+    if(mod='KD12JFG1D1YTFG9'){
+        window.alert("Вы активировали ответы на все вопросы!");
+        window.alert("Medium:1.Дом,2.Приручает.3.Торгует.4.овд");}
+	else{
+		alert("Модификации не существует!")
+	}
+
+	
+}
+</script>
+<body>
+<h3>Думайте,прежде чем писать!</h3>
+<img src="game3.jpg"/>
+</body>
+</html>

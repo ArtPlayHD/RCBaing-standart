@@ -1,0 +1,89 @@
+<!DOCTYPE>
+<html>
+<button id="SG1" class="gameinfo" onclick=startGame()>Старт</button>
+
+<head>
+<link rel="stylesheet" type="text/css"href="style.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <title data='true'>Крипер на ферме - игра</title>
+
+</head>
+<body id="fone_KNFt">
+
+    <div id='topbar'>
+        <h3>Игра крипер у порога</h3>
+    </div>
+    <div id='mainsection'>
+        
+    </div>
+    <p id='timer' class='gameinfo'></p>
+    <p id='scoreboard'class='gameinfo'></p>
+    <p id='highscore' class='gameinfo'></p>
+    <div id='gamearea'></div>
+    
+</body>
+<script>
+    if(localStorage.getItem('open/close')=='0'){
+        window.alert("Страница закрыта.")
+        window.location.href='Page_close.html'
+    }
+    var highscore = 0;
+    function startGame(){
+        document.getElementById("SG1").disabled = true;
+        $('#SG1').css("background-color","grey");
+        var gameLength = 60;
+        var monsterCount =0;
+        var score = 0;
+        var round = setInterval(function(){
+        var key=highscore;
+        
+
+        if(gameLength > 0){
+            gameLength = gameLength - 1;
+            document.getElementById("timer").innerHTML = gameLength+"секунд осталось";
+            document.getElementById("scoreboard").innerHTML = "Твой счёт:"+score;
+            document.getElementById("highscore").innerHTML = "Лучший результат:" +highscore;}   
+        else{
+            document.getElementById("SG1").disabled = false;
+            $('#SG1').css("background-color","");      
+            clearInterval(round);
+        }
+        
+
+        },1000)
+        var game = setInterval(function() {
+            if (gameLength>0){
+                $('#'+monsterCount).remove();
+                monsterCount = monsterCount+1;
+                monsterID = "monster"+monsterCount;
+                monsterX=Math.floor((Math.random()*80)+1);
+                monsterY=Math.floor((Math.random()/2)+1);
+                
+                $('#gamearea').append("<img src ='kreeper.jpg' id='"+monsterCount+"'/>")
+                $('#'+monsterCount).css("margin-left",monsterX+"%");
+                $('#'+monsterCount).css("margin-top",monsterY+"%");
+                $('#'+monsterCount).css("width","8%");
+                $('#'+monsterCount).click(function(){
+                    $('#'+monsterCount).remove();
+                    score = score+10;localStorage.setItem('key','key1')})
+                    if(score>highscore){highscore=score;}
+					var key = highscore;
+                    if(key>highscore){highscore=key}
+					localStorage.setItem('key',key);
+					var high = localStorage.getItem('key');
+					if(highscore<high){highscore=score}
+                
+            }
+                
+            else{
+                clearInterval(game);}
+                
+            
+        },900)
+
+        
+       
+        
+    }
+</script>
+</html>

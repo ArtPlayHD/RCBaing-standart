@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<button id="make"onclick = "CS()">Создать</button>
+<head>
+    <title data="true">Crafting and building - игра</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css"href="style.css">
+
+</head>
+<body>
+
+</body>
+<script>
+function CS(){
+    
+    var shapeCount = shapeCount+1;
+    var size = Math.floor((Math.random()*100)+5)
+    var colors = ["red","green","blue"];
+    var randomColor = colors[Math.floor(Math.random()*colors.length)];
+    var shapeID = 'shape'+shapeCount;
+    $('body').append("<div id='"+shapeID+"'></div>");
+    $('#'+shapeID).css("width",size+"px");
+    $('#'+shapeID).css("min-heigh",size+"px");
+    $('#'+shapeID).css("background-color",randomColor);
+    $('#'+shapeID).draggable();}
+</script>
+
+</html>

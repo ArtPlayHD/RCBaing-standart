@@ -1,0 +1,27 @@
+<!DOCTYPE>
+<html>
+<link rel="stylesheet" type="text/css"href="style.css">
+<button id="SAdventure"onclick="SEASY()">Создать мир</button>
+<img src="EASY_TERRAIN.jpg"/>
+<script>
+ function SEASY(){ 
+        var gamer=prompt("Выбери персонажа или имя")
+        var monster=prompt("Выбери любимого монстра")
+        var build=prompt(gamer+" попал в новый мир.Построй кровать,дом или ничего.")
+        if(build=='кровать'){
+            window.alert(gamer+" строит кровать и ложится спать.Ночью его бьёт"+monster);
+            window.alert(gamer+" не смог защититься и респавнился в другом месте!Попробуй ещё раз!");}
+        if(build=='ничего'){
+            window.alert(gamer+" начинает игру и его бьёт "+monster);
+            window.alert(gamer+" не смог защититься и респавнился в другом месте!Попробуй ещё раз!");}
+        if(build=='дом'){
+            var buildWOD=prompt(gamer+" строит дом.Теперь "+monster+" ему не страшен.Появляется волк!"+gamer+"Приручает или бежит?")
+            if(buildWOD=='приручает'){
+                    window.alert(gamer+" приручает волка,и он защищает его от "+monster+" Победа!");}
+
+            else{
+                window.alert(gamer+" бежит от волка и падает у порога!Начни сначала!");}}
+}
+
+</script>
+</html>

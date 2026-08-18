@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Аллея Цветов — RCBaing / Ant Legion</title>
+  <style>
+/* --- Аллея цветов: тёмные стили --- */
+
+#flower-alley-container {
+  margin-top: 24px;
+}
+
+.flower-bed-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.flower-bed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  border-color: var(--accent);
+}
+
+.flower-name-level {
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.flower-status {
+  font-size: 0.9rem;
+  margin: 8px 0;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.status-growing {
+  background: rgba(243, 156, 18, 0.15);
+  color: #f39c12;
+}
+.status-ready {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+/* Кнопки на грядке */
+.bed-actions button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+/* Модалка торговли (отдельный оверлей) */
+#trade-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.75); /* чуть темнее основного оверлея */
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+  backdrop-filter: blur(4px);
+}
+#trade-overlay.active {
+  display: flex;
+}
+
+.trade-dialog {
+  background: var(--panel);
+  width: 90%;
+  max-width: 640px;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+}
+
+.trade-mode-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--wood);
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 10px;
+}
+
+#trade-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+/* Скроллбар для списка кнопок */
+#trade-buttons::-webkit-scrollbar {
+  width: 6px;
+}
+#trade-buttons::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 3px;
+}
+
+.trade-btn {
+  padding: 6px 4px;
+  font-size: 11px;
+  line-height: 1.2;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  white-space: normal;
+  height: 56px; /* фиксированная высота для ровных ячеек */
+  text-align: center;
+  transition: all 0.1s;
+}
+.trade-btn:hover {
+  transform: scale(1.05);
+  z-index: 2;
+  position: relative;
+}
+
+.btn-buy {
+  background: rgba(211, 84, 0, 0.8);
+  color: white;
+}
+.btn-sell-flower {
+  background: rgba(50, 205, 50, 0.8);
+  color: white;
+}
+.btn-sell-chip {
+  background: rgba(241, 196, 15, 0.8);
+  color: #000;
+  font-weight: 700;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.stat-item {
+  background: rgba(255,255,255,0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.diamond-stat { color: var(--gold); font-weight: bold; }
+
+  </style>
+</head>
+<body>
+  <div class="top-nav">
+    <a href="out_door.html" class="back-btn">← Назад (Двор)</a>
+  </div>
+
+
+
+	<h2>🌸 Аллея цветов</h2>
+<div id="flower-alley-container"></div>
+
+<script>
+// --- КОНФИГУРАЦИЯ ЦВЕТОВ (НАЗВАНИЯ ПО УРОВНЯМ) ---
+const flowerNames = [
+  'Ромашка', 'Василёк', 'Лютик', 'Одуванчик', 'Клевер',
+  'Картошка', 'Подсолнух', 'Гвоздика', 'Пион', 'Тюльпан',
+  'Нарцисс', 'Ирис', 'Герань', 'Бегония', 'Фиалка',
+  'Орхидея', 'Лилия', 'Роза', 'Хризантема', 'Камелия',
+  'Азалия', 'Гортензия', 'Эустома', 'Анемона', 'Фрезия',
+  'Катарантус', 'Примула', 'Цикламен', 'Крокус', 'Гиацинт'
+];
+
+function getFlowerNameByLevel(level) {
+  const idx = (level - 1) % flowerNames.length;
+  return flowerNames[idx] || `Цветок ${level}`;
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ СОСТОЯНИЯ (если нет) ---
+if (!state.flowerAlley) {
+  state.flowerAlley = {
+    beds: [],
+    seeds: 0,
+    flowers: 0,
+    chips: 0,
+    diamonds: 0
+  };
+  // Создаём 12 грядок для наглядности
+  for (let i = 0; i < 12; i++) {
+    state.flowerAlley.beds.push({
+      id: i + 1,
+      level: 1,
+      progress: 0,
+      ready: false,
+      name: getFlowerNameByLevel(1),
+      cd: 10000 // 10 секунд для теста (потом можно поставить 60000)
+    });
+  }
+  saveState();
+}
+
+// --- ЦЕНЫ ---
+function getSeedPrice(level) { return level * 5; }
+function getFlowerPrice(level) { return getSeedPrice(level) * 2; }
+const chipPrice = 70;
+
+// --- ПРОИЗВОДСТВО И СБОР ---
+function startProduction(bedId) {
+  const bed = state.flowerAlley.beds.find(b => b.id === bedId);
+  if (!bed || bed.ready || bed.progress > 0) return;
+  
+  bed.progress = 0;
+  saveState();
+  renderFlowerAlley();
+
+  const interval = setInterval(() => {
+    bed.progress += 1000;
+    if (bed.progress >= bed.cd) {
+      bed.progress = bed.cd;
+      bed.ready = true;
+      clearInterval(interval);
+      saveState();
+      renderFlowerAlley();
+    }
+  }, 1000);
+}
+
+function harvest(bedId) {
+  const bed = state.flowerAlley.beds.find(b => b.id === bedId);
+  if (!bed || !bed.ready) return;
+
+  state.flowerAlley.flowers++;
+  bed.ready = false;
+  bed.progress = 0;
+  saveState();
+  renderFlowerAlley();
+}
+
+function makeChips() {
+  const costFlowers = 5;
+  if (state.flowerAlley.flowers >= costFlowers) {
+    state.flowerAlley.flowers -= costFlowers;
+    state.flowerAlley.chips++;
+    saveState();
+    renderFlowerAlley();
+  } else {
+    alert('Не хватает цветков! Нужно 5 цветков для 1 чипса.');
+  }
+}
+
+// --- ТОРГОВЛЯ ---
+function openTradeDialog(mode) {
+  const overlay = document.getElementById('trade-overlay');
+  const title = document.querySelector('#trade-overlay .trade-mode-title');
+  const container = document.getElementById('trade-buttons');
+  
+  if (!overlay || !title || !container) return;
+
+  overlay.style.display = 'flex';
+  title.innerText = mode === 'buy' ? '🌾 Покупка семян' : '💰 Продажа товаров';
+  container.innerHTML = '';
+
+  const maxButtons = 100; // 100 кнопок в одном окне
+
+  for (let i = 1; i <= maxButtons; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'trade-btn';
+    
+    if (mode === 'buy') {
+      const price = getSeedPrice(i);
+      btn.innerText = `Ур.${i}\n${price} рес.`;
+      btn.classList.add('btn-buy');
+      btn.onclick = () => buySeeds(i, price);
+    } else {
+      // Продажа: 1-50 цветки, 51-100 чипсы
+      if (i <= 50) {
+        const price = getFlowerPrice(i);
+        btn.innerText = `Цв. ур.${i}\n${price} алм.`;
+        btn.classList.add('btn-sell-flower');
+        btn.onclick = () => sellFlowers(i, price);
+      } else {
+        btn.innerText = `Чипсы\n${chipPrice} алм.`;
+        btn.classList.add('btn-sell-chip');
+        btn.onclick = () => sellChips(chipPrice);
+      }
+    }
+    container.appendChild(btn);
+  }
+}
+
+function closeTradeDialog() {
+  const overlay = document.getElementById('trade-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function buySeeds(level, price) {
+  if (state.bag.resources >= price) {
+    state.bag.resources -= price;
+    state.flowerAlley.seeds++;
+    saveState();
+    renderFlowerAlley();
+    // Визуальный фидбек
+    const el = document.getElementById('bag-resources');
+    if(el) el.style.color = '#2ecc71';
+    setTimeout(() => el.style.color = '', 500);
+  } else {
+    alert('Недостаточно ресурсов в сумке!');
+  }
+}
+
+function sellFlowers(level, price) {
+  if (state.flowerAlley.flowers > 0) {
+    state.flowerAlley.flowers--;
+    state.flowerAlley.diamonds += price;
+    saveState();
+    renderFlowerAlley();
+  } else {
+    alert('Нет собранных цветков для продажи!');
+  }
+}
+
+function sellChips(price) {
+  if (state.flowerAlley.chips > 0) {
+    state.flowerAlley.chips--;
+    state.flowerAlley.diamonds += price;
+    saveState();
+    renderFlowerAlley();
+  } else {
+    alert('Нет чипсов для продажи!');
+  }
+}
+
+// --- ОТРИСОВКА ---
+function renderFlowerAlley() {
+  const el = document.getElementById('flower-alley-container');
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="stats-row">
+      <div class="stat-item">🌾 Семена: ${state.flowerAlley.seeds}</div>
+      <div class="stat-item">🌸 Цветки: ${state.flowerAlley.flowers}</div>
+      <div class="stat-item">🍟 Чипсы: ${state.flowerAlley.chips}</div>
+      <div class="stat-item diamond-stat">💎 Алмазы: ${state.flowerAlley.diamonds}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:12px;">
+      ${state.flowerAlley.beds.map(bed => {
+        const percent = Math.min(100, (bed.progress / bed.cd) * 100);
+        const isGrowing = !bed.ready && bed.progress < bed.cd;
+        
+        return `
+          <div class="flower-bed-card">
+            <span class="flower-name-level">${bed.name} (ур.${bed.level})</span>
+            <div class="flower-status ${isGrowing ? 'status-growing' : 'status-ready'}">
+              ${bed.ready ? 'Готов к сбору' : `Рост: ${Math.floor(percent)}%`}
+            </div>
+            
+            <div class="bed-actions">
+              ${!isGrowing && !bed.ready ? `
+                <button class="btn-green" onclick="startProduction(${bed.id})">Начать рост</button>
+              ` : ''}
+              ${bed.ready ? `
+                <button class="btn-accent" onclick="harvest(${bed.id})">Собрать цветок</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-green" onclick="makeChips()">🍟 Произвести чипсы (5 цв. → 1 шт.)</button>
+      <button class="btn-accent" onclick="openTradeDialog('buy')">🛒 Купить семена</button>
+      <button class="btn-green" onclick="openTradeDialog('sell')">💸 Продать товары</button>
+    </div>
+  `;
+}
+
+// --- ВСТАВКА МОДАЛКИ (если её нет в HTML) ---
+function injectTradeModal() {
+  if (document.getElementById('trade-overlay')) return;
+  const body = document.body;
+  const modal = document.createElement('div');
+  modal.id = 'trade-overlay';
+  modal.innerHTML = `
+    <div class="trade-dialog">
+      <h3 class="trade-mode-title" id="trade-modal-title">Торговля</h3>
+      <div id="trade-buttons" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; max-height: 60vh; overflow-y: auto; padding: 4px;"></div>
+      <hr style="border: 0; border-top: 1px dashed var(--border); margin: 16px 0;">
+      <button class="btn-red" style="width: 100%;" onclick="closeTradeDialog()">Закрыть</button>
+    </div>
+  `;
+  body.appendChild(modal);
+}
+injectTradeModal();
+
+// --- ЗАПУСК ---
+renderFlowerAlley();
+	
+</script>

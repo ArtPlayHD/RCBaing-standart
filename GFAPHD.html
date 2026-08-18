@@ -1,0 +1,21 @@
+<link rel="stylesheet" type="text/css"href="style.css">
+<img src='Setup_minecraft.png'/>
+<button id = "download2" onclick="triggerDownload('Gaydi po minecraft ArtPlayHD.rtf')">Скачать книгу"гайды по minecraft"</button>
+<script>
+function triggerDownload(fileName) {
+  var element = document.createElement('a');
+  element.setAttribute('href', fileName);
+  element.setAttribute('download', fileName);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  // Происходит клик, словно совершил его сам программирующий ниндзя
+  element.click();
+  document.body.removeChild(element);
+  localStorage.setItem('Messange',"Была скачана книга 'Гайды по minecraft'")
+}
+if(localStorage.getItem('open/close')=='0'){
+    window.alert("Страница закрыта.")
+    window.location.href='Page_close.html'
+}
+
+</script>
