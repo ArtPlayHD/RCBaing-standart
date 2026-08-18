@@ -1,0 +1,461 @@
+<head>
+	<title>Помощь союзников|Альянс</title>
+<style>
+/* Панель помощи альянса — стиль «старинная табличка» */
+#ally-help-panel {
+  max-width: 420px;
+  margin: 32px auto;
+  padding: 24px;
+  border: 1px solid rgba(80, 50, 30, 0.4);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fbf4e8, #f4ede1);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.12),
+    inset 0 0 8px rgba(255, 255, 255, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Декоративная рамка-накладка (эффект деревянной таблички) */
+#ally-help-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(100, 70, 45, 0.7);
+  border-radius: 14px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+#ally-help-panel h3 {
+  margin: 0 0 12px 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 700;
+  color: #4a3321;
+  text-align: center;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+#ally-help-panel p {
+  color: #6a523e;
+  line-height: 1.5;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+/* Имя бота — акцентный блок */
+#bot-name {
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(211, 84, 0, 0.15);
+  color: #d35400;
+  border: 1px solid rgba(211, 84, 0, 0.3);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1.05rem;
+  box-shadow: 0 2px 4px rgba(211, 84, 0, 0.2);
+}
+
+/* Кнопка — «деревянная», но современная */
+#btn-bot-help {
+  width: 100%;
+  padding: 14px;
+  background: #5d4037;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 8px rgba(93, 64, 55, 0.35);
+}
+
+#btn-bot-help:hover:not(:disabled) {
+  background: #795548;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(93, 64, 55, 0.45);
+}
+
+#btn-bot-help:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+#btn-bot-help:disabled {
+  background: #c8c8c8;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Таймер-уведомление — тёплый янтарный стиль */
+#bot-timer {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #fff8e1;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  display: none; /* показываем через JS */
+  text-align: center;
+  font-weight: 600;
+  box-shadow: inset 0 0 12px rgba(255, 193, 7, 0.2);
+  animation: pulse-soft 2s infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: inset 0 0 12px rgba(255, 193, 7, 0.2); }
+  50% { box-shadow: inset 0 0 16px rgba(255, 193, 7, 0.35); }
+}
+
+/* Ранг альянса — аккуратный блок */
+.ally-rank-block {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-top: 1px dashed #dcdcdc;
+  color: #5a473b;
+}
+
+#ally-rank {
+  font-weight: 700;
+  color: #5d4037;
+  font-size: 1.15rem;
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 480px) {
+  #ally-help-panel { margin: 16px; padding: 18px; }
+  #btn-bot-help { padding: 12px; font-size: 1rem; }
+}
+#ally-help-panel {
+  max-width: 400px;
+  margin: 30px auto;
+  padding: 20px;
+  border-radius: 14px;
+  background: #fdfbf9;
+  border: 1px solid #d9d4cc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Заголовок + бейдж ранга */
+.ally-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.ally-header h3 {
+  margin: 0;
+  color: #4a3321;
+  font-size: 1.2rem;
+}
+.ally-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+/* Цвета по рангам */
+.rank-novice { background: #e0e7ff; color: #4f46e5; }
+.rank-fighter { background: #fef3c7; color: #d97706; }
+.rank-pro { background: #d1fae5; color: #059e73; }
+.rank-veteran { background: #fca5a5; color: #dc2626; }
+
+.ally-desc {
+  color: #665f54;
+  line-height: 1.4;
+  margin: 8px 0 16px;
+  font-size: 0.92rem;
+}
+
+.ally-bot-info {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #555;
+  font-size: 0.95rem;
+}
+.bot-name-highlight {
+  color: #d35400;
+  font-weight: 600;
+}
+
+/* Кнопка действия — как «иконка с подписью», не громоздкая */
+.btn-ally-action {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #5d4037 0%, #8d6e63 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 8px rgba(93, 64, 55, 0.3);
+}
+.btn-ally-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(93, 64, 55, 0.45);
+  background: linear-gradient(135deg, #795548 0%, #a1887f 100%);
+}
+.btn-ally-action:disabled {
+  background: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.action-icon { font-size: 1.15rem; }
+
+/* Таймер-уведомление — аккуратный, не «кричащий» */
+.ally-timer-notice {
+  margin-top: 12px;
+  padding: 8px;
+  background: #fff8e1;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 0.9rem;
+  display: none; /* показываем через JS */
+  font-weight: 600;
+}
+
+/* Прогресс-бар ранга */
+.ally-progress-wrap { margin-top: 22px; }
+.ally-label {
+  font-size: 0.85rem;
+  color: #777;
+  margin-bottom: 6px;
+}
+.ally-bar-container {
+  height: 8px;
+  background: #e9e9e9;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.ally-bar-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #f5f5f5;
+}
+.ally-bar-fill {
+  height: 100%;
+  background: #5d4037;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.ally-next-rank {
+  margin-top: 8px;
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+</style>
+</head>
+<body>
+<!-- Панель помощи альянса с рангами -->
+<div id="ally-help-panel">
+  <div class="ally-header">
+    <h3>🏛 Помощь альянса</h3>
+    <span class="ally-badge" id="ally-rank-badge">Новичок</span>
+  </div>
+
+  <p class="ally-desc">Получай поддержку от бота. Лимит: 2 раза за 5 минут.</p>
+
+  <div class="ally-bot-info">
+    Имя бота: <span id="bot-name" class="bot-name-highlight">...</span>
+  </div>
+
+  <!-- Кнопка в стиле «значка действия» -->
+  <button id="btn-bot-help" class="btn-ally-action">
+    <span class="action-icon">🦸</span> Помощь боту (+ранг)
+  </button>
+
+  <div id="bot-timer" class="ally-timer-notice"></div>
+
+  <div class="ally-progress-wrap">
+    <div class="ally-label">Прогресс до следующего ранга</div>
+    <div class="ally-bar-container">
+      <div class="ally-bar-bg"></div>
+      <div class="ally-bar-fill" id="ally-bar-fill"></div>
+    </div>
+    <div class="ally-next-rank" id="ally-next-rank">Боец</div>
+  </div>
+</div>
+
+<!-- Меню помощи альянса -->
+<div id="ally-help-panel" style="
+  max-width: 400px; margin: 30px auto;
+  padding: 20px; border: 3px solid #5d4037;
+  border-radius: 12px; background: rgba(255,255,255,0.9);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15); text-align: center;
+">
+  <h3>🏛 Помощь альянса</h3>
+  <p style="color:#555; margin-bottom:15px;">
+    Получай поддержку от бота — но не слишком часто.
+  </p>
+
+  <div style="margin-bottom:15px; font-weight:bold; color:#333;">
+    Имя бота: <span id="bot-name" style="color:#d35400;">...</span>
+  </div>
+
+  <button id="btn-bot-help" class="btn-upgrade" style="
+    width:100%; padding:12px; font-size:1.1rem;
+  ">Запросить помощь у бота</button>
+
+  <div id="bot-timer" style="
+    margin-top:12px; padding:8px;
+    background:#fff3cd; color:#856404;
+    border-radius:6px; display:none;
+    text-align:center; font-weight:bold;
+  "></div>
+
+  <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+    <span>Ранг альянса:</span>
+    <span id="ally-rank" style="font-weight:bold; color:#5d4037;">0</span>
+  </div>
+</div>
+</body>
+<script>
+// --- Ранги и прогресс ---
+function updateRankUI() {
+  const rankPoints = state.ally.rank; // общее число очков ранга
+  // пороги для рангов: Новичок (0), Боец (10), Про (30), Ветеран (60)
+  const thresholds = [
+    { name: 'Новичок', colorClass: 'rank-novice', next: 'Боец', needed: 10 },
+    { name: 'Боец', colorClass: 'rank-fighter', next: 'Про', needed: 30 },
+    { name: 'Про', colorClass: 'rank-pro', next: 'Ветеран', needed: 60 },
+    { name: 'Ветеран', colorClass: 'rank-veteran', next: 'Элита', needed: Infinity }
+  ];
+
+  let currentRank = thresholds[0];
+  for (const r of thresholds) {
+    if (rankPoints >= r.needed) currentRank = r;
+    else break;
+  }
+
+  // Определяем следующий ранг и прогресс
+  const nextRankIndex = thresholds.indexOf(currentRank) + 1;
+  const nextRank = nextRankIndex < thresholds.length ? thresholds[nextRankIndex] : null;
+
+  const badgeEl = document.getElementById('ally-rank-badge');
+  badgeEl.textContent = currentRank.name;
+  badgeEl.className = 'ally-badge ' + currentRank.colorClass;
+
+  document.getElementById('ally-next-rank').textContent = nextRank ? nextRank.next : 'Макс. ранг';
+
+  if (nextRank) {
+    const prevNeeded = nextRankIndex > 0 ? thresholds[nextRankIndex - 1].needed : 0;
+    const rangeStart = prevNeeded;
+    const rangeEnd = nextRank.needed;
+    const progress = Math.max(0, Math.min(100, ((rankPoints - rangeStart) / (rangeEnd - rangeStart)) * 100));
+    document.getElementById('ally-bar-fill').style.width = progress + '%';
+  } else {
+    document.getElementById('ally-bar-fill').style.width = '100%';
+  }
+}
+
+// --- Логика помощи боту (2 раза в 5 минут) ---
+const BOT_HELP_WINDOW_MS = 5 * 60 * 1000; // 5 минут
+const BOT_MAX_PER_WINDOW = 2;             // максимум 2 помощи за окно
+
+function tryBotHelp() {
+  const now = Date.now();
+  const btn = document.getElementById('btn-bot-help');
+  const timerEl = document.getElementById('bot-timer');
+
+  // Сдвигаем окно, если прошло больше 5 минут с последнего действия
+  if (now - state.ally.lastBotHelp >= BOT_HELP_WINDOW_MS) {
+    state.ally.helpCountInWindow = 0;
+    state.ally.lastBotHelp = now;
+  }
+
+  if (state.ally.helpCountInWindow >= BOT_MAX_PER_WINDOW) {
+    const nextWindowStart = state.ally.lastBotHelp + BOT_HELP_WINDOW_MS;
+    const remaining = Math.max(0, nextWindowStart - now);
+    const mm = Math.floor(remaining / 1000 / 60);
+    const ss = Math.floor((remaining / 1000) % 60);
+
+    timerEl.style.display = 'block';
+    timerEl.innerText = `Помощь временно недоступна. Окно откроется через: ${mm}м ${ss}с`;
+    return;
+  }
+
+  // Проверка ресурсов: нужно минимум 100 грибов
+  if (state.resources.mush < 100) {
+    alert('Недостаточно грибов для запроса помощи (-100 грибов)');
+    return;
+  }
+
+  // Выдача помощи
+  state.resources.mush -= 100;
+  state.resources.water += 100;
+  state.resources.leaf += 100;
+  state.resources.food += 100;
+
+  // +1 очко ранга (а не просто +1 ранг)
+  state.ally.rank += 1;
+  state.ally.helpCountInWindow += 1;
+  state.ally.lastBotHelp = now; // обновляем начало окна на момент помощи
+
+  saveState();
+  updateResourcesUI();
+  updateRankUI();
+
+  timerEl.style.display = 'none';
+  alert('Помощь получена! +100 к каждому ресурсу, -100 грибов, +1 очко ранга.');
+}
+
+document.getElementById('btn-bot-help').onclick = tryBotHelp;
+
+// Периодическая проверка таймера
+setInterval(() => {
+  const now = Date.now();
+  const timerEl = document.getElementById('bot-timer');
+  if (!timerEl || timerEl.style.display !== 'block') return;
+
+  const nextWindowStart = state.ally.lastBotHelp + BOT_HELP_WINDOW_MS;
+  const remaining = Math.max(0, nextWindowStart - now);
+  if (remaining <= 0) {
+    timerEl.style.display = 'none';
+    if (now - state.ally.lastBotHelp >= BOT_HELP_WINDOW_MS) {
+      state.ally.helpCountInWindow = 0;
+      state.ally.lastBotHelp = now;
+      saveState();
+    }
+  } else {
+    const mm = Math.floor(remaining / 1000 / 60);
+    const ss = Math.floor((remaining / 1000) % 60);
+    timerEl.innerText = `Помощь временно недоступна. Окно откроется через: ${mm}м ${ss}с`;
+  }
+}, 1000);
+
+// Инициализация при загрузке
+if (!state.ally) {
+  state.ally = {
+    rank: 0,
+    lastBotHelp: 0,
+    botName: generateRandomBotName(),
+    helpCountInWindow: 0
+  };
+  saveState();
+}
+document.getElementById('bot-name').innerText = state.ally.botName;
+updateRankUI();
+
+</script>

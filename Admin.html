@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Floor — RCBaing Mod</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #05070a;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .floor-admin {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      background: radial-gradient(circle at center, #12161e 0%, #05070a 100%);
+    }
+
+    /* Экран 1: Регистрация */
+    #screen-register,
+    #screen-login,
+    #screen-verify {
+      display: none;
+      width: 360px;
+      background: #0b0d12;
+      border: 1px solid #2a2f39;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    #screen-register.active,
+    #screen-login.active,
+    #screen-verify.active {
+      display: block;
+    }
+
+    h2.title {
+      color: #f1c40f;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+
+    p.desc {
+      color: #aaa;
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      background: #05070a;
+      border: 1px solid #2a2f39;
+      border-radius: 6px;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #f1c40f;
+    }
+
+    button.btn {
+      width: 100%;
+      padding: 12px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 15px;
+    }
+
+    button.btn:hover {
+      background: #34495e;
+    }
+
+    button.btn-primary {
+      background: #f1c40f;
+      color: #000;
+    }
+
+    button.btn-primary:hover {
+      background: #e6b000;
+    }
+
+    .status-msg {
+      margin-top: 12px;
+      font-size: 13px;
+      min-height: 20px;
+    }
+
+    .success { color: #2ecc71; }
+    .error { color: #e74c3c; }
+
+    /* Экран 2: Ввод кода */
+    .code-display {
+      font-family: monospace;
+      font-size: 28px;
+      color: #2ecc71;
+      font-weight: bold;
+      margin: 16px 0;
+      letter-spacing: 4px;
+      user-select: none;
+    }
+
+    /* Экран 3: Админ-панель */
+    #admin-panel {
+      display: none;
+      width: 420px;
+      background: #0b0d12;
+      border: 1px solid #2a2f39;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 0 30px rgba(241, 196, 15, 0.15);
+    }
+
+    #admin-panel.active {
+      display: block;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #1a1f26;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-label { color: #888; font-size: 12px; text-transform: uppercase; }
+    .stat-value { color: white; font-weight: bold; font-size: 18px; }
+
+    .admin-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-action {
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #333;
+      color: white;
+      border-color: #555;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-action:hover { border-color: #f1c40f; color: #f1c40f; }
+
+    @media (max-width: 500px) {
+      .floor-admin { flex-direction: column; padding-top: 20px; }
+      #admin-panel, #screen-register, #screen-login, #screen-verify { width: 100%; max-width: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="floor-admin">
+
+  <!-- Экран 1: Регистрация -->
+  <div id="screen-register" class="active">
+    <h2 class="title">Регистрация</h2>
+    <p class="desc">Создайте админ‑учётку для доступа к этажу управления альянсом.</p>
+    <input type="email" id="reg-email" placeholder="Ваш email (например, test@yandex.ru)">
+    <input type="password" id="reg-pass" placeholder="Придумайте пароль">
+    <button class="btn btn-primary" onclick="Reg()">Создать аккаунт</button>
+    <div id="reg-status" class="status-msg"></div>
+    <p style="margin-top:16px; font-size:12px; color:#666;">Уже есть аккаунт? <a href="#" onclick="logoutAdmin()" style="color:#f1c40f;">Войти</a></p>
+  </div>
+
+  <!-- Экран 2: Вход -->
+  <div id="screen-login">
+    <h2 class="title">Вход</h2>
+    <p class="desc">Введите данные для доступа к админ‑панели.</p>
+    <input type="email" id="login-email" placeholder="Email">
+    <input type="password" id="login-pass" placeholder="Пароль">
+    <button class="btn btn-primary" onclick="handleLogin()">Войти</button>
+    <div id="login-status" class="status-msg"></div>
+    <p style="margin-top:16px; font-size:12px; color:#666;">Нет аккаунта? <a href="#" onclick="showScreen('register')" style="color:#f1c40f;">Регистрация</a></p>
+  </div>
+
+  <!-- Экран 3: Верификация (код на почту) -->
+  <div id="screen-verify">
+    <h2 class="title">Подтверждение</h2>
+    <p class="desc">Мы «отправили» код на указанную почту. Введите его для доступа.</p>
+    <div class="code-display" id="sent-code">123456</div>
+    <p style="font-size:13px; color:#888; margin-bottom:16px;">(В реальном моде это был бы SMTP‑запрос. Здесь — имитация отправки.)</p>
+    <input type="text" id="verify-code" placeholder="Код из письма" maxlength="6">
+    <button class="btn btn-primary" onclick="handleVerify()">Подтвердить</button>
+    <div id="verify-status" class="status-msg"></div>
+  </div>
+
+  <!-- Экран 4: Админ‑панель -->
+  <div id="admin-panel">
+    <h2 class="title" style="color:#2ecc71;">Админ‑панель</h2>
+    <p class="desc" style="color:#aaa;">Управление ресурсами и щитами альянса TWA / Murany 506.</p>
+
+    <div class="admin-stats">
+      <div class="stat-box">
+        <div class="stat-label">Мощь альянса</div>
+        <div class="stat-value" id="stat-power">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Ресурсы склада</div>
+        <div class="stat-value" id="stat-resources">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Щит активен</div>
+        <div class="stat-value" style="color:#e74c3c;">Нет</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Очки перехвата</div>
+        <div class="stat-value" id="stat-intercepts">0</div>
+      </div>
+    </div>
+
+    <div class="admin-actions">
+      <button class="btn-action" onclick="toggleShield()">Активировать щит</button>
+      <button class="btn-action" onclick="distributeResources()">Распределить ресурсы</button>
+      <button class="btn-action" onclick="updatePower()">Обновить мощь</button>
+      <button class="btn-action" onclick="logoutAdmin()">Выйти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+(function() {
+  const STORAGE_KEY = 'rcbaing_admin_users';
+  const SESSION_KEY = 'rcbaing_admin_session';
+  
+  let currentUser = null;
+  let sentCode = null;
+  function Reg(){
+  alert("Не доступно!Попробуй войти!")
+  }
+  // --- Вспомогательные функции ---
+  function showScreen(name) {
+    document.querySelectorAll('#screen-register,#screen-login,#screen-verify').forEach(el => el.classList.remove('active'));
+    if (name === 'register') document.getElementById('screen-register').classList.add('active');
+    if (name === 'login') document.getElementById('screen-login').classList.add('active');
+    if (name === 'verify') document.getElementById('screen-verify').classList.add('active');
+  }
+
+  function setStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+  }
+
+  function loadUsers() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+  }
+
+  // --- Регистрация ---
+  window.handleRegister = function() {
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value.trim();
+
+    if (!email || !pass) {
+      setStatus('reg-status', 'Заполните все поля', 'error');
+      return;
+    }
+
+    const users = loadUsers();
+    if (users.find(u => u.email === email)) {
+      setStatus('reg-status', 'Такой email уже зарегистрирован', 'error');
+      return;
+    }
+
+    users.push({ email, passHash: pass }); // В моде без сервера можно хранить как есть
+    saveUsers(users);
+
+    setStatus('reg-status', 'Аккаунт создан. Теперь войдите.', 'success');
+    setTimeout(() => showScreen('login'), 1500);
+  };
+
+  // --- Вход ---
+  window.handleLogin = function() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value.trim();
+
+    const users = loadUsers();
+    const user = users.find(u => u.email === email && u.passHash === pass);
+
+    if (!user) {
+      setStatus('login-status', 'Неверный email или пароль', 'error');
+      return;
+    }
+
+    // Имитация отправки кода на почту
+    sentCode = Math.floor(100000 + Math.random() * 900000).toString();
+    document.getElementById('sent-code').textContent = sentCode;
+
+    currentUser = user;
+    showScreen('verify');
+  };
+
+  // --- Верификация ---
+  window.handleVerify = function() {
+    const code = document.getElementById('verify-code').value.trim();
+    if (code === sentCode) {
+      localStorage.setItem(SESSION_KEY, currentUser.email);
+      showAdminPanel();
+    } else {
+      setStatus('verify-status', 'Неверный код', 'error');
+    }
+  };
+
+  // --- Админ‑панель ---
+  function showAdminPanel() {
+    // Загрузка статистики из другого этажа (или заглушка)
+    document.getElementById('stat-power').textContent = '7 200 000 000'; // пример: мощь альянса
+    document.getElementById('stat-resources').textContent = localStorage.getItem('rcbaing_resources') || '0';
+    document.getElementById('stat-intercepts').textContent = localStorage.getItem('rcbaing_intercepts') || '0';
+
+    document.querySelectorAll('#screen-register,#screen-login,#screen-verify').forEach(el => el.classList.remove('active'));
+    document.getElementById('admin-panel').classList.add('active');
+  }
+
+  window.toggleShield = function() {
+    const btn = document.querySelector('.admin-actions button:nth-child(1)');
+    const stat = document.querySelectorAll('.stat-box')[2].querySelector('.stat-value');
+    if (stat.textContent === 'Нет') {
+      stat.textContent = 'Да';
+      stat.style.color = '#2ecc71';
+      btn.textContent = 'Отключить щит';
+    } else {
+      stat.textContent = 'Нет';
+      stat.style.color = '#e74c3c';
+      btn.textContent = 'Активировать щит';
+    }
+  };
+
+  window.distributeResources = function() {
+    alert('Ресурсы распределены между членами альянса TWA.');
+  };
+
+  window.updatePower = function() {
+    const val = document.getElementById('stat-power');
+    val.textContent = (parseInt(val.textContent.replace(/\s/g,'')) + 100000000).toLocaleString('ru-RU');
+  };
+
+  window.logoutAdmin = function() {
+    localStorage.removeItem(SESSION_KEY);
+    currentUser = null;
+    showScreen('login');
+  };
+
+  // Авто‑вход, если сессия есть
+  const sessionEmail = localStorage.getItem(SESSION_KEY);
+  if (sessionEmail) {
+    const users = loadUsers();
+    const u = users.find(x => x.email === sessionEmail);
+    if (u) {
+      currentUser = u;
+      showAdminPanel();
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+      showScreen('login');
+    }
+  } else {
+    showScreen('register');
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Альянс | Ant Legion Mini</title>
+  <style>
+    :root {
+      --bg-overlay: rgba(0, 0, 0, 0.7);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.15);
+    }
+    body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; }
+    .bg-container { position: absolute; inset: 0; z-index: 1; }
+    .bg-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .overlay { position: absolute; inset: 0; background: var(--bg-overlay); z-index: 2; }
+    .main-ui { position: relative; z-index: 3; max-width: 520px; margin: 0 auto; padding: 20px; }
+    h1 { color: var(--text); text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 8px; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); padding: 14px; border-radius: 10px; text-align: center; }
+    .stat-label { color: #aaa; font-size: 0.8rem; text-transform: uppercase; }
+    .stat-value { font-weight: 700; font-size: 1.2rem; color: var(--text); }
+    .rank-badge { padding: 6px 12px; border-radius: 20px; font-weight: 700; display: inline-block; }
+    .rank-novice { background: rgba(255,255,255,0.1); color: #fff; }
+    .rank-fighter { background: #fdcb6e; color: #000; }
+    .rank-pro { background: #4facf9; color: #fff; }
+    .rank-veteran { background: var(--accent); color: #000; }
+    .btn-group { display: grid; gap: 12px; margin-top: 28px; }
+    .btn {
+      background: var(--panel); border: 1px solid var(--border); color: var(--text);
+      padding: 14px; border-radius: 10px; cursor: pointer; font-weight: 600;
+      text-align: left; transition: all 0.2s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,107,129,0.1); }
+    .back-btn {
+      position: absolute; bottom: 20px; left: 20px; z-index: 4;
+      background: rgba(0,0,0,0.7); border: 1px solid var(--border);
+      color: var(--text); padding: 12px 20px; border-radius: 50px;
+      cursor: pointer; text-decoration: none; font-weight: 600;
+    }
+    .back-btn:hover { background: rgba(0,0,0,0.9); border-color: var(--accent); }
+
+    /* Модальное окно выбора альянса */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); display: none;
+      align-items: center; justify-content: center; z-index: 999;
+      backdrop-filter: blur(6px);
+    }
+    .modal {
+      background: #1a1d24; border: 1px solid var(--border);
+      border-radius: 12px; width: 90%; max-width: 460px;
+      padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .ally-option {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px; margin: 8px 0; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: all 0.2s;
+    }
+    .ally-option:hover { transform: scale(1.02); border-color: var(--accent); }
+    .ally-info strong { font-size: 1rem; }
+    .ally-power-tag { background: rgba(79, 175, 249, 0.2); color: #4facf9; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <!-- Фон как в игре -->
+  <div class="bg-container">
+    <img src="alans.jpg" alt="" class="bg-img">
+  </div>
+  <div class="overlay"></div>
+
+  <div class="main-ui">
+    <h1 id="ally-name">Не в альянсе</h1>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Мощь альянса</div>
+        <div class="stat-value" id="ally-power">0B</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Твой ранг</div>
+        <div id="player-rank" class="rank-badge rank-novice">Новичок</div>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn" onclick="openHelp()">Помощь</button>
+      <button class="btn" onclick="location.href='tech_ally.html'">Технологии</button>
+      <button class="btn" onclick="openInfo()">Информация</button>
+      <button class="btn" style="border-color: #ff4757; color: #ff4757;" onclick="leaveAlly()">Выйти из альянса</button>
+    </div>
+  </div>
+
+  <a href="ant_house.html" class="back-btn">← Назад</a>
+
+  <!-- Модалка выбора альянса -->
+  <div id="ally-modal" class="modal-overlay">
+    <div class="modal">
+      <h2 style="margin:0 0 16px; color:var(--accent); text-align:center;">Выбери альянс</h2>
+      <p style="color:#aaa; margin-bottom:16px; text-align:center;">Получай бонусы и участвуй в захватах без активных боёв.</p>
+      
+      <div class="ally-option" onclick="selectAlly('TWA')">
+        <span class="ally-info"><strong>TWA</strong> <span style="color:#aaa; font-size:0.85rem;">(Твой альянс)</span></span>
+        <span class="ally-power-tag">3.8B</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('MUR')">
+        <span class="ally-info"><strong>Murany 506</strong></span>
+        <span class="ally-power-tag">2.1B</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('MIR')">
+        <span class="ally-info"><strong>MIR</strong></span>
+        <span class="ally-power-tag">2.5B</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('SPA')">
+        <span class="ally-info"><strong>SPA</strong></span>
+        <span class="ally-power-tag">3.1B</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('none')" style="opacity:0.6;">
+        <span class="ally-info"><strong>Не вступать</strong></span>
+        <span class="ally-power-tag">0B</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Загрузка состояния из localStorage
+    let state = JSON.parse(localStorage.getItem('ant_state')) || {
+      currentAlly: 'none',
+      contribution: 0,
+      log: [],
+      unlockedTechs: [] // массив ID открытых технологий
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function saveState() {
+      localStorage.setItem('ant_state', JSON.stringify(state));
+    }
+
+    function getRank(contribution) {
+      if (contribution >= 80) return { name: 'Ветеран', class: 'rank-veteran' };
+      if (contribution >= 50) return { name: 'Профи', class: 'rank-pro' };
+      if (contribution >= 20) return { name: 'Боец', class: 'rank-fighter' };
+      return { name: 'Новичок', class: 'rank-novice' };
+    }
+
+    function updateUI() {
+      const nameEl = el('ally-name');
+      const powerEl = el('ally-power');
+      const rankEl = el('player-rank');
+
+      const names = {
+        'none': 'Не в альянсе',
+        'TWA': 'TWA',
+        'MUR': 'Murany 506',
+        'MIR': 'MIR',
+        'SPA': 'SPA'
+      };
+      nameEl.textContent = names[state.currentAlly] || 'Не в альянсе';
+
+      const powers = {
+        'none': 0,
+        'TWA': 3800000000,
+        'MUR': 2100000000,
+        'MIR': 2500000000,
+        'SPA': 3100000000
+      };
+      const allyPower = powers[state.currentAlly] || 0;
+      powerEl.textContent = (allyPower / 1e9).toFixed(1) + 'B';
+
+      const r = getRank(state.contribution);
+      rankEl.textContent = r.name;
+      rankEl.className = 'rank-badge ' + r.class;
+    }
+
+    // Если не в альянсе — показываем выбор
+    if (state.currentAlly === 'none') {
+      setTimeout(() => {
+        el('ally-modal').style.display = 'flex';
+      }, 300);
+    }
+
+    function selectAlly(ally) {
+      state.currentAlly = ally;
+      // Небольшая имитация вклада (для ранга)
+      if (ally !== 'none') state.contribution = 12;
+      else state.contribution = 0;
+
+      updateUI();
+      el('ally-modal').style.display = 'none';
+      saveState();
+      alert('Ты вступил в альянс: ' + (state.currentAlly === 'none' ? 'Нет' : state.currentAlly));
+    }
+
+    function leaveAlly() {
+      if (confirm('Выйти из текущего альянса?')) {
+        state.currentAlly = 'none';
+        state.contribution = 0;
+        updateUI();
+        saveState();
+        // Снова показываем выбор, если вышел
+        setTimeout(() => el('ally-modal').style.display = 'flex', 300);
+      }
+    }
+
+    function openHelp() { alert('Помощь: советы по альянсам и тактике захвата ресурсов без боёв.'); }
+    function openInfo() { alert('Информация: описание альянсов, бонусы, требования к вкладу.'); }
+
+    updateUI();
+  </script>
+</body>
+</html>

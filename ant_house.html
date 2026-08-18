@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Ant House — Ant Legion Mod</title>
+  <style>
+    :root {
+      /* Светлая тема */
+      --bg: #f5f0e6;
+      --panel: #ffffff;
+      --wood: #5d4037;
+      --accent: #d35400;
+      --gold: #f1c40f;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --border: #ccc;
+      --text: #333;
+      --header: #2c3e50;
+    }
+
+    [data-theme="dark"] {
+      /* Тёмная тема */
+      --bg: #1b1b1f;
+      --panel: #2a2a35;
+      --wood: #cfa388;
+      --accent: #ff954b;
+      --gold: #ffd780;
+      --green: #4cd13b;
+      --red: #ff6b6b;
+      --border: #444;
+      --text: #e0e0e0;
+      --header: #f1f1f3;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: var(--bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    h1, h2 { color: var(--header); }
+
+    /* Переключатель темы */
+    .top-nav {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--wood);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+    #theme-toggle {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+    }
+    [data-theme="dark"] #theme-toggle { background: rgba(0,0,0,0.2); }
+
+    /* Панели зданий */
+    .building-panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+    }
+    .building-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 8px;
+    }
+    .building-name { font-weight: 700; color: var(--wood); }
+    .building-level { font-weight: bold; color: var(--gold); }
+    .building-power { color: #888; font-size: 0.9rem; }
+
+    button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-red { background: var(--red); color: white; }
+
+    /* Диалоги */
+    .dialog-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .dialog {
+      background: var(--panel);
+      width: 90%;
+      max-width: 480px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .dialog-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--wood);
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .dialog-info { margin-bottom: 16px; line-height: 1.5; color: var(--text); }
+    .dialog-power { font-weight: bold; color: var(--gold); margin: 8px 0; }
+
+    /* События: карточки и модалка */
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .event-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+    .event-card:hover { transform: translateY(-2px); background: rgba(var(--wood), 0.08); }
+    .event-title { font-weight: 600; margin-bottom: 4px; color: var(--text); }
+    .event-desc { font-size: 0.85rem; color: #aaa; }
+
+    .event-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1100;
+    }
+    .event-modal {
+      background: var(--panel);
+      max-width: 420px;
+      width: 90%;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .event-modal h3 { margin-top: 0; color: var(--wood); }
+
+    /* Сумка */
+    .bag-section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+    }
+    .bag-row { display: flex; gap: 12px; margin: 6px 0; flex-wrap: wrap; }
+    .bag-item {
+      flex: 1; min-width: 120px;
+      padding: 8px;
+      background: rgba(0,0,0,0.05);
+      border-radius: 6px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    /* Муравьи */
+    .ants-section { margin-top: 24px; }
+    .ant-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; background: rgba(0,0,0,0.05);
+      border-radius: 8px; border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <a href="index.html" class="back-btn">← Назад (Двор)</a>
+    <button id="theme-toggle">🌙 Тёмная тема</button>
+  </div>
+
+  <h1>🏛 Муравейник</h1>
+
+  <!-- Королева -->
+  <div class="building-panel" onclick="openBuildingDialog('queen')">
+    <div class="building-header">
+      <span class="building-name">👑 Королева</span>
+      <span class="building-level" id="queen-level">Ур. 1</span>
+    </div>
+    <p class="building-power">Мощь: <b id="queen-power">50.5</b></p>
+    <p style="font-size:0.85rem;color:#888;">Улучшай Королеву — растёт общая мощь армии.</p>
+  </div>
+
+  <!-- Казармы -->
+  <div class="building-panel" onclick="openBuildingDialog('barracks')">
+    <div class="building-header">
+      <span class="building-name">🛡 Казармы</span>
+      <span class="building-level" id="barracks-level">Ур. 1</span>
+    </div>
+    <p class="building-power">Мощь: <b id="barracks-power">50.5</b></p>
+    <p style="font-size:0.85rem;color:#888;">Здесь обучают солдат и усиливают мощь армии.</p>
+  </div>
+
+  <!-- Фермы -->
+  <div class="building-panel">
+    <div class="building-header">
+      <span class="building-name">🌿 Фермы ресурсов</span>
+    </div>
+    <p>Твои фермы работают как раньше. Собирай ресурсы и используй их для улучшений.</p>
+  </div>
+
+  <!-- Еженедельные события -->
+  <h2>📅 Еженедельные события</h2>
+  <div class="events-grid">
+    <div class="event-card" onclick="openEvent('supplies')">
+      <div class="event-title">🚚 Сопровождение припасов</div>
+      <div class="event-desc">Помоги каравану — получи награду.</div>
+    </div>
+    <div class="event-card" onclick="openEvent('power-contest')">
+      <div class="event-title">⚔️ Состязание мощь</div>
+      <div class="event-desc">Сравни мощь альянсов и займи топ.</div>
+    </div>
+    <div class="event-card" onclick="openEvent('weekly-gift')">
+      <div class="event-title">🎁 Подарки недели</div>
+      <div class="event-desc">Особые награды каждую неделю.</div>
+    </div>
+  </div>
+
+  <!-- Ежедневные события -->
+  <h2>☀️ Ежедневные события</h2>
+  <div class="events-grid">
+    <div class="event-card" onclick="openEvent('daily-gift')">
+      <div class="event-title">🎒 Подарок за заход</div>
+      <div class="event-desc">Награда за ежедневный вход в игру.</div>
+    </div>
+    <div class="event-card" onclick="openEvent('power-race')">
+      <div class="event-title">⚡ Мощь гонка</div>
+      <div class="event-desc">Соревнуйся по мощи каждый день.</div>
+    </div>
+  </div>
+
+  <!-- Сумка -->
+  <div class="bag-section">
+    <h3>🎒 Сумка</h3>
+    <p>Здесь хранятся ресурсы от подарков и ускорители прогресса.</p>
+    <div class="bag-row">
+      <div class="bag-item">
+        <b>Ресурсы</b><br>
+        <span id="bag-resources">0</span> ед.
+      </div>
+      <div class="bag-item">
+        <b>Ускорители</b><br>
+        <span id="bag-boosters">0</span> шт.
+      </div>
+    </div>
+  </div>
+
+  <!-- Муравьи -->
+  <div class="ants-section">
+    <h3>🐜 Особые муравьи</h3>
+    <p>Улучшай особых муравьёв — они дают дополнительную мощь!</p>
+    <div class="ant-card">
+      <div>
+        <b>Воин-страж</b><br>
+        Мощь: +500
+      </div>
+      <button class="btn-accent" onclick="upgradeAnt('warrior')">Улучшить</button>
+    </div>
+    <div class="ant-card">
+      <div>
+        <b>Инженер-строитель</b><br>
+        Мощь: +300
+      </div>
+      <button class="btn-accent" onclick="upgradeAnt('engineer')">Улучшить</button>
+    </div>
+  </div>
+
+  <!-- Диалог здания -->
+  <div id="dialog-overlay" class="dialog-overlay">
+    <div class="dialog">
+      <div class="dialog-title" id="dialog-title">Здание</div>
+      <div class="dialog-info" id="dialog-info">Информация о здании.</div>
+      <div class="dialog-power" id="dialog-power">Мощь: —</div>
+      <div style="display:flex;gap:10px;">
+        <button id="dialog-btn-improve" class="btn-accent" style="flex:1;">Улучшить</button>
+        <button id="dialog-btn-train" class="btn-green" style="flex:1;display:none;">Обучить</button>
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn-red" style="width:100%;" onclick="closeDialog()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка события -->
+  <div id="event-modal-overlay" class="event-modal-overlay">
+    <div class="event-modal">
+      <h3 id="event-modal-title">Событие</h3>
+      <p id="event-modal-desc" style="color:#888;"></p>
+      <hr style="border:0;border-top:1px solid var(--border);margin:16px 0;">
+      <p><b>Награда:</b> <span id="event-modal-reward">—</span></p>
+      <p><b>Условия:</b> <span id="event-modal-conditions">—</span></p>
+      <div style="margin-top:20px;display:flex;justify-content:center;gap:12px;">
+        <button class="btn-green" onclick="claimEventReward()">Получить награду</button>
+        <button class="btn-red" onclick="closeEventModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="ant_house_logyc.js"></script>

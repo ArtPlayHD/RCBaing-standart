@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Ant Legion Mini | RCBaing</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --success: #51cf66;
+      --info: #4facf9;
+      --danger: #ff4757;
+      --warning: #fdcb6e;
+      --dark-panel: rgba(0, 0, 0, 0.6);
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header-bar {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .title {
+      font-size: 1.8rem;
+      color: var(--accent);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+    }
+    .title::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+    }
+    .stat-label { color: #aaa; font-size: 0.8rem; text-transform: uppercase; }
+    .stat-value { font-weight: 700; font-size: 1.2rem; }
+    .section-title {
+      color: var(--info);
+      font-size: 1.4rem;
+      margin: 24px 0 12px 0;
+      text-align: center;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      width: 100%; max-width: 960px;
+    }
+    .grid-area {
+      width: 100%; max-width: 960px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    @media (max-width: 640px) { .grid-area { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .btn {
+      background: transparent; border: 1px solid var(--border); color: var(--text);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer;
+      font-weight: 600; width: 100%; text-align: left; transition: all 0.2s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,107,129,0.1); }
+    .btn-primary {
+      background: var(--accent); border: none; color: white;
+      padding: 12px 18px; border-radius: 8px; cursor: pointer;
+      font-weight: 700; width: 100%; margin-top: 8px;
+    }
+    .btn-primary:hover { background: #e85a73; transform: translateY(-1px); }
+    .log-area {
+      background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px; height: 130px; overflow-y: auto;
+      font-size: 0.9rem; color: #ccc; margin-top: 12px;
+      scrollbar-width: thin;
+    }
+    .log-line { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
+
+    /* Альянсы */
+    .ally-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .ally-name { font-weight: 700; color: var(--text); }
+    .ally-power { color: #aaa; }
+    .ally-badge {
+      padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-twa { background: rgba(255,107,129,0.2); color: var(--accent); }
+    .badge-mur { background: rgba(79, 175, 249, 0.2); color: var(--info); }
+    .badge-mir { background: rgba(139, 92, 230, 0.2); color: #c794ff; }
+    .badge-spa { background: rgba(96, 181, 116, 0.2); color: #6fb574; }
+    .badge-none { background: rgba(255,255,255,0.1); color: #aaa; }
+
+    .progress-bar-bg {
+      background: rgba(255,255,255,0.1); border-radius: 6px; height: 6px; margin-top: 6px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; border-radius: 6px; transition: width 0.3s ease;
+    }
+
+    .rank-tag {
+      font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: #fff; margin-left: 8px;
+    }
+    .rank-veteran { background: var(--success); }
+    .rank-fighter { background: var(--warning); }
+    .rank-novice { background: rgba(255,255,255,0.15); }
+
+    .bonus-status {
+      font-size: 0.85rem; margin-top: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .dot.active { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .dot.inactive { background: #555; }
+
+    /* Модальное окно выбора альянса (как в игре) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8); display: none;
+      align-items: center; justify-content: center; z-index: 1000;
+      backdrop-filter: blur(6px);
+    }
+    .modal {
+      background: var(--dark-panel); border: 1px solid var(--border);
+      border-radius: 12px; width: 90%; max-width: 500px;
+      padding: 20px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal h2 { margin: 0 0 16px 0; color: var(--accent); }
+    .ally-option {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px; margin: 8px 0; cursor: pointer;
+      transition: all 0.2s; text-align: left;
+    }
+    .ally-option:hover { transform: scale(1.02); border-color: var(--accent); }
+    .ally-option.selected { border-color: var(--accent); background: rgba(255,107,129,0.15); }
+
+    /* Музыка */
+    .music-control {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--dark-panel); border: 1px solid var(--border);
+      border-radius: 50px; padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 999;
+    }
+    .music-btn {
+      background: var(--accent); border: none; color: white;
+      padding: 8px 14px; border-radius: 20px; cursor: pointer; font-weight: 600;
+    }
+    .music-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="header-bar">
+    <h1 class="title">🐜 Штаб муравьёв</h1>
+    <div style="font-size:0.9rem; color:#aaa;">Ник: ArtPlayHD</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">Еда</div><div class="stat-value" id="res-food">1200</div></div>
+    <div class="stat-card"><div class="stat-label">Вода</div><div class="stat-value" id="res-water">950</div></div>
+    <div class="stat-card"><div class="stat-label">Мощь армии</div><div class="stat-value" id="army-power">3.2B</div></div>
+    <div class="stat-card"><div class="stat-label">Щит</div><div class="shield-status" id="shield-status">Активен (48ч)</div></div>
+  </div>
+
+  <!-- Кнопка открытия меню альянса -->
+  <h2 class="section-title">🤝 Альянс</h2>
+  <div style="width:100%; max-width:960px;">
+    <button class="btn-primary" onclick="openAllyModal()">Выбрать альянс</button>
+    
+    <!-- Текущий статус альянса -->
+    <div id="ally-status-display" class="panel" style="margin-top:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="color:#aaa; margin-right:8px;">Альянс:</span>
+          <span id="current-ally-name" style="font-weight:700;">Не в альянсе</span>
+          <span class="ally-badge" id="current-ally-badge" class="badge-none">Не в альянсе</span>
+        </div>
+        <span id="rank-display" class="rank-tag rank-novice">Новичок</span>
+      </div>
+      <div class="ally-row" style="margin:12px 0;">
+        <span>Бонус альянса:</span>
+        <span id="current-ally-bonus" style="color:var(--success)">+0%</span>
+      </div>
+      <div>
+        <span style="color:#aaa; font-size:0.85rem;">Твой вклад:</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="contribution-bar" style="width:0%; background:var(--warning)"></div>
+        </div>
+        <div style="margin-top:6px; color:#aaa; font-size:0.85rem;">
+          <span id="player-contribution">0%</span>
+        </div>
+      </div>
+      <div id="bonus-display" class="bonus-status" style="margin-top:10px;">
+        <span class="dot inactive"></span>Бонус не активен
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-area" style="margin-top:24px;">
+    <!-- Ферма -->
+    <div class="panel">
+      <h3>🌾 Ферма ресурсов</h3>
+      <p style="color:#aaa; font-size:0.9rem;">Собирай ресурсы, чтобы прокачивать муравейник и армию.</p>
+      <button class="btn btn-primary" onclick="collectResources()">Собрать ресурсы</button>
+      <div style="margin-top:12px;">
+        <button class="btn" onclick="upgradeFarm()">Улучшить ферму (+15%)</button>
+        <div style="margin-top:8px; color:#aaa; font-size:0.85rem;">Уровень фермы: <span id="farm-level">1</span></div>
+      </div>
+    </div>
+    <!-- Армия и щит -->
+    <div class="panel">
+      <h3>🛡️ Защита и мощь</h3>
+      <p style="color:#aaa; font-size:0.9rem;">Щит защищает от атак. Прокачка увеличивает мощь армии.</p>
+      <button class="btn btn-primary" onclick="toggleShield()">Поставить/снять щит</button>
+      <div style="margin-top:12px;">
+        <button class="btn" onclick="trainArmy()">Прокачать армию (+10%)</button>
+        <div style="margin-top:8px; color:#aaa; font-size:0.85rem;">Мощь: <span id="power-bonus">+0%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="width:100%; max-width:960px; margin-top:24px;">
+    <h3>📝 Журнал событий</h3>
+    <div class="log-area" id="log-area"></div>
+  </div>
+
+  <!-- Модальное окно альянсов -->
+  <div id="ally-modal" class="modal-overlay">
+    <div class="modal">
+      <h2>Выбор альянса</h2>
+      <p style="color:#aaa; margin-bottom:16px;">Выбери альянс, чтобы получить бонус к мощи.</p>
+      
+      <div class="ally-option" onclick="selectAlly('TWA')" id="opt-TWA">
+        <strong>TWA</strong> <span style="float:right; color:var(--success)">+8%</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('MUR')" id="opt-MUR">
+        <strong>Murany 506</strong> <span style="float:right; color:var(--info)">+6%</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('MIR')" id="opt-MIR">
+        <strong>MIR</strong> <span style="float:right; color:#c794ff">+7%</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('SPA')" id="opt-SPA">
+        <strong>SPA</strong> <span style="float:right; color:#6fb574">+5%</span>
+      </div>
+      <div class="ally-option" onclick="selectAlly('none')" id="opt-none" style="border-color:#555;">
+        <strong>Не в альянсе</strong> <span style="float:right; color:#aaa">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Музыка -->
+  <div class="music-control">
+    <span>🎵 Музыка</span>
+    <button id="music-btn" class="music-btn" onclick="toggleMusic()">Включить</button>
+  </div>
+
+  <audio id="bg-music" src="AntLegion.mp3" autoplay loop></audio>
+<script>
+// Состояние игры
+let state = {
+  food: 1200,
+  water: 950,
+  farmLevel: 1,
+  powerBonus: 0,          // личный бонус к мощи
+  allyBonus: 0,           // бонус текущего альянса
+  shieldActive: true,
+  shieldTimer: 48,
+  armyPowerBase: 3200000000, // 3.2B
+  allyTwaPower: 3800000000,  // 3.8B
+  allyMurPower: 2100000000,  // Murany 506 ~2.1B
+  allyMirPower: 2500000000,  // MIR
+  allySpaPower: 3100000000,  // SPA
+  currentAlly: 'none',       // TWA / MUR / MIR / SPA / 'none'
+  contribution: 0,         // вклад в %
+  allyRank: 1,              // ранг в альянсе (1–5)
+  bonusActive: false,       // активирован ли бонус альянса
+  log: []
+};
+
+const el = (id) => document.getElementById(id);
+
+// Бонусы альянсов
+const allyBonuses = {
+  'TWA': 8,
+  'MUR': 6,
+  'MIR': 7,
+  'SPA': 5,
+  'none': 0
+};
+
+// Названия, цвета и ранги (для «игрового» вида)
+const allyInfo = {
+  'TWA': { name: 'TWA', badgeClass: 'badge-twa', rankName: 'Ветеран', rankClass: 'rank-veteran' },
+  'MUR': { name: 'Murany 506', badgeClass: 'badge-mur', rankName: 'Боец', rankClass: 'rank-fighter' },
+  'MIR': { name: 'MIR', badgeClass: 'badge-mir', rankName: 'Боец', rankClass: 'rank-fighter' },
+  'SPA': { name: 'SPA', badgeClass: 'badge-spa', rankName: 'Новичок', rankClass: 'rank-novice' },
+  'none': { name: 'Не в альянсе', badgeClass: 'badge-none', rankName: '-', rankClass: '' }
+};
+
+// Добавить запись в журнал
+function addLog(msg) {
+  state.log.push(msg);
+  if (state.log.length > 10) state.log.shift();
+  const area = el('log-area');
+  if (!area) return;
+  area.innerHTML = state.log.map(l => `<div class="log-line">${l}</div>`).join('');
+  area.scrollTop = area.scrollHeight;
+}
+
+// Обновить все показатели на странице
+function updateUI() {
+  // Ресурсы
+  const foodEl = el('res-food');
+  const waterEl = el('res-water');
+  if (foodEl) foodEl.textContent = Math.floor(state.food).toLocaleString();
+  if (waterEl) waterEl.textContent = Math.floor(state.water).toLocaleString();
+
+  // Мощь армии
+  const totalBonus = state.powerBonus + state.allyBonus;
+  const power = Math.floor(state.armyPowerBase * (1 + totalBonus / 100));
+  const armyEl = el('army-power');
+  if (armyEl) armyEl.textContent = (power / 1e9).toFixed(1) + 'B';
+
+  // Ферма
+  const farmEl = el('farm-level');
+  if (farmEl) farmEl.textContent = state.farmLevel;
+
+  // Общий бонус
+  const bonusEl = el('power-bonus');
+  if (bonusEl) bonusEl.textContent = totalBonus + '%';
+
+  // Щит
+  const statusEl = el('shield-status');
+  if (statusEl) {
+    if (state.shieldActive) {
+      statusEl.textContent = 'Активен (' + state.shieldTimer + 'ч)';
+      statusEl.style.color = 'var(--success, #51cf66)';
+    } else {
+      statusEl.textContent = 'Неактивен';
+      statusEl.style.color = '#aaa';
+    }
+  }
+
+  // Текущий альянс и его данные
+  const currNameEl = el('current-ally-name');
+  const currBonusEl = el('current-ally-bonus');
+  const currContEl = el('player-contribution');
+  const currBadgeEl = el('current-ally-badge');
+  const contBarEl = el('contribution-bar');
+  const rankEl = el('rank-display');
+  const bonusStatusEl = el('bonus-display');
+
+  if (currNameEl) currNameEl.textContent = allyInfo[state.currentAlly].name;
+  if (currBonusEl) {
+    currBonusEl.textContent = state.allyBonus + '%';
+    currBonusEl.style.color = state.allyBonus > 0 ? 'var(--success, #51cf66)' : '#aaa';
+  }
+  if (currContEl) currContEl.textContent = state.contribution + '%';
+  if (contBarEl) {
+    contBarEl.style.width = state.contribution + '%';
+    contBarEl.style.background = 'var(--warning, #fdcb6e)';
+  }
+  if (rankEl) {
+    rankEl.textContent = allyInfo[state.currentAlly].rankName;
+    rankEl.className = 'rank-tag ' + allyInfo[state.currentAlly].rankClass;
+  }
+  if (currBadgeEl) {
+    currBadgeEl.className = 'ally-badge ' + allyInfo[state.currentAlly].badgeClass;
+    currBadgeEl.textContent = allyInfo[state.currentAlly].name;
+  }
+  if (bonusStatusEl) {
+    const dot = bonusStatusEl.querySelector('.dot');
+    if (dot) {
+      dot.className = state.bonusActive ? 'dot active' : 'dot inactive';
+      bonusStatusEl.innerHTML = `<span class="dot ${state.bonusActive ? 'active' : 'inactive'}"></span>${state.bonusActive ? 'Бонус активен' : 'Бонус не активен'}`;
+    }
+  }
+}
+
+// Открыть модальное окно альянсов
+function openAllyModal() {
+  const modal = el('ally-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  
+  // Подсветка текущего выбора
+  document.querySelectorAll('.ally-option').forEach(o => o.classList.remove('selected'));
+  const selected = el('opt-' + (state.currentAlly === 'none' ? 'none' : state.currentAlly));
+  if (selected) selected.classList.add('selected');
+}
+
+// Выбрать альянс
+function selectAlly(newAlly) {
+  if (state.currentAlly === newAlly) {
+    addLog('Ты уже в этом альянсе.');
+    el('ally-modal').style.display = 'none';
+    return;
+  }
+
+  state.currentAlly = newAlly;
+  state.allyBonus = allyBonuses[newAlly] || 0;
+  state.contribution = newAlly === 'none' ? 0 : 12;
+  state.bonusActive = newAlly !== 'none';
+
+  addLog(`Сменил альянс: ${allyInfo[newAlly].name}. Бонус: +${state.allyBonus}%`);
+  el('ally-modal').style.display = 'none';
+  updateUI();
+}
+
+// Активировать бонус альянса
+function applyAllyBonus() {
+  if (state.currentAlly === 'none') {
+    addLog('Сначала вступи в альянс, чтобы активировать бонус.');
+    return;
+  }
+  state.bonusActive = true;
+  addLog('Бонус альянса активирован: +' + state.allyBonus + '% к мощи.');
+  updateUI();
+}
+
+// План захвата ресурсов (тактика без активных боёв)
+function planRaid() {
+  addLog('План: захват ресурсов у противника без активных боевых действий. Тактика: брать из склада.');
+}
+
+// Сбор ресурсов
+function collectResources() {
+  const base = 150;
+  const bonus = base * (state.farmLevel - 1) * 0.15; // +15% за каждый уровень фермы
+  const gain = base + bonus;
+
+  state.food += gain;
+  state.water += gain;
+
+  addLog(`Собрано ${Math.floor(gain)} еды и воды.`);
+  updateUI();
+}
+
+// Улучшение фермы
+function upgradeFarm() {
+  const cost = 300 * state.farmLevel; // растёт с уровнем
+  if (state.food >= cost && state.water >= cost) {
+    state.food -= cost;
+    state.water -= cost;
+    state.farmLevel++;
+    addLog(`Ферма улучшена до уровня ${state.farmLevel}.`);
+    updateUI();
+  } else {
+    addLog('Не хватает ресурсов для улучшения фермы.');
+  }
+}
+
+// Поставить/снять щит
+function toggleShield() {
+  if (state.shieldActive) {
+    state.shieldActive = false;
+    addLog('Щит снят. Теперь можно атаковать или быть атакованным.');
+  } else {
+    state.shieldActive = true;
+    state.shieldTimer = 48;
+    addLog('Щит поставлен на 48 часов. База защищена.');
+  }
+  updateUI();
+}
+
+// Прокачка армии
+function trainArmy() {
+  const cost = 500 + state.powerBonus * 50;
+  if (state.food >= cost && state.water >= cost) {
+    state.food -= cost;
+    state.water -= cost;
+    state.powerBonus += 10;
+    addLog(`Армия прокачана: +10% к мощи.`);
+    updateUI();
+  } else {
+    addLog('Недостаточно ресурсов для тренировки армии.');
+  }
+}
+
+// Музыка
+const musicBtn = el('music-btn');
+const bgMusic = el('bg-music');
+let isMusicEnabled = false;
+
+function toggleMusic() {
+  if (!bgMusic) return;
+  isMusicEnabled = !isMusicEnabled;
+  if (isMusicEnabled) {
+    bgMusic.play().catch(e => {
+      console.warn('Автовоспроизведение заблокировано браузером — нужен клик пользователя');
+      isMusicEnabled = false;
+    });
+    musicBtn.textContent = 'Выключить';
+    addLog('Музыка включена');
+  } else {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    musicBtn.textContent = 'Включить';
+    addLog('Музыка выключена');
+  }
+}
+
+// Таймер щита (каждую минуту минус 1 час)
+setInterval(() => {
+  if (state.shieldActive && state.shieldTimer > 0) {
+    state.shieldTimer--;
+    if (state.shieldTimer === 0) {
+      state.shieldActive = false;
+      addLog('Время щита истекло.');
+    }
+    updateUI();
+  }
+}, 60000);
+
+// Инициализация при загрузке
+updateUI();
+
+</script>
+<script>
+<// --- Музыка (игровой стиль) ---
+const musicBtn = document.getElementById('music-btn');
+const bgMusic = document.getElementById('bg-music');
+
+// Если элементов нет — выходим, чтобы не ломать остальной код
+if (!musicBtn || !bgMusic) {
+  console.warn('Элементы для музыки не найдены. Проверьте HTML.');
+} else {
+  let isMusicEnabled = false;
+  const baseVolume = 0.6; // комфортная громкость как в играх
+  bgMusic.volume = baseVolume;
+  bgMusic.loop = true;
+
+  function toggleMusic() {
+    if (!bgMusic) return;
+
+    isMusicEnabled = !isMusicEnabled;
+
+    if (isMusicEnabled) {
+      // Браузеры разрешают play() только после взаимодействия пользователя (клик)
+      bgMusic.play().then(() => {
+        musicBtn.textContent = 'Выключить';
+        addLog('🎵 Музыка включена');
+      }).catch(err => {
+        console.warn('Автовоспроизведение заблокировано браузером — нужен клик пользователя', err);
+        isMusicEnabled = false;
+        musicBtn.textContent = 'Включить';
+      });
+    } else {
+      bgMusic.pause();
+      bgMusic.currentTime = 0; // сброс позиции, чтобы при следующем включении не было «обрывка»
+      musicBtn.textContent = 'Включить';
+      addLog('🔇 Музыка выключена');
+    }
+  }
+
+  // Плавное изменение громкости (если захочешь добавить кнопки +/-)
+  function setVolume(value) {
+    const v = Math.max(0, Math.min(1, value)); // clamp 0–1
+    bgMusic.volume = v;
+  }
+
+  // Привязать событие к кнопке
+  musicBtn.addEventListener('click', toggleMusic);
+
+  // Инициализация: если хочешь, чтобы музыка была выключена по умолчанию (как в большинстве игр)
+  bgMusic.pause();
+  bgMusic.currentTime = 0;
+}
+</script>
