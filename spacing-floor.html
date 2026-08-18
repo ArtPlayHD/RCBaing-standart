@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Пункт ПВО — RCBaing Mod (исправлено)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #05070a;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    .floor-pvo {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0b0d12;
+      position: relative;
+    }
+
+    h2.pvo-title {
+      margin: 20px 24px 16px;
+      color: #f1c40f;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border-bottom: 1px solid #2a2f39;
+      padding-bottom: 8px;
+      font-size: 22px;
+    }
+
+    .pvo-stats-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      padding: 0 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .stat-label {
+      color: #aaa;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: white;
+      font-size: 24px;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .stat-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      max-width: 320px;
+    }
+
+    .stat-sublabel {
+      color: #888;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .stat-count {
+      color: #ccc;
+      font-weight: 500;
+    }
+
+    .pvo-container {
+      position: relative;
+      height: 140px;
+      background: #080a0d;
+      border: 1px solid #1a1f26;
+      overflow: hidden;
+      border-radius: 8px;
+      margin: 0 24px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+    }
+
+    #pvo-track {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+
+    .pvo-target {
+      position: absolute;
+      cursor: crosshair;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      user-select: none;
+      will-change: transform;
+      pointer-events: auto;
+      /* Убрали display:flex и текст — теперь это просто блок */
+    }
+
+    /* Всплывающая подсказка с названием цели */
+    .pvo-tooltip {
+      position: absolute;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 20;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .pvo-target:hover .pvo-tooltip {
+      opacity: 1;
+    }
+
+    .pvo-flash {
+      position: absolute;
+      width: 60px; height: 60px;
+      background: rgba(255,255,255,0.7);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: scale(0);
+      z-index: 10;
+      animation: pvo-flash-anim 0.2s forwards;
+    }
+
+    @keyframes pvo-flash-anim {
+      to { transform: scale(1); opacity: 0; }
+    }
+
+    .pvo-hint {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      color: #666;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 5;
+      background: rgba(11,13,18,0.85);
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .cooldown-active {
+      color: #e74c3c !important;
+      font-weight: 600;
+      text-shadow: 0 0 4px rgba(231, 76, 60, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .pvo-stats-panel { padding: 0 16px; }
+      .stat-value { font-size: 20px; }
+      .pvo-container { height: 110px; margin: 0 16px; }
+      h2.pvo-title { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="floor-pvo">
+  <h2 class="pvo-title">Пункт ПВО — Защита сектора</h2>
+
+  <div class="pvo-stats-panel">
+    <div class="stat-item">
+      <span class="stat-label">Общий счёт:</span>
+      <span id="score-display" class="stat-value">0</span>
+    </div>
+
+    <div class="stat-list">
+      <div><span class="stat-sublabel">Ракеты:</span> <span id="stat-missile" class="stat-count">0</span></div>
+      <div><span class="stat-sublabel">Беспилотники:</span> <span id="stat-drone" class="stat-count">0</span></div>
+      <div><span class="stat-sublabel">Таинственные шары:</span> <span id="stat-orb" class="stat-count">0</span></div>
+    </div>
+  </div>
+
+  <div class="pvo-container">
+    <div id="pvo-track"></div>
+    <div class="pvo-hint" id="hint-text">Кликни по цели, чтобы перехватить</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const TYPES = {
+    missile: { name: 'Ракета', color: '#e74c3c', points: 10, baseSpeed: 0.3, driftSpeed: 0.15 },
+    drone:   { name: 'Беспилотник', color: '#f39c12', points: 20, baseSpeed: 0.2, driftSpeed: 0.2 },
+    orb:     { name: 'Таинственный шар', color: '#9b59b6', points: 50, baseSpeed: 0.1, driftSpeed: 0.1 }
+  };
+
+// В STATE добавляем флаг для «мусорных» целей
+const STATE = {
+  score: 0,
+  intercepted: { missile: 0, drone: 0, orb: 0 },
+  activeTargets: [],      // живые цели
+  removedTargets: []       // ID целей, которые уже улетели, но ещё не почищены
+};
+
+// Функция очистки «мусора» раз в 1–2 секунды
+function cleanupRemoved() {
+  const now = Date.now();
+  STATE.removedTargets = STATE.removedTargets.filter(id => {
+    // Оставляем ID, если они «свежие» (на случай очень редких задержек)
+    return true; // можно усложнить, если понадобится
+  });
+  STATE.activeTargets = STATE.activeTargets.filter(t => !STATE.removedTargets.includes(t.id));
+}
+setInterval(cleanupRemoved, 2000);
+
+// В animateTarget: вместо немедленного removeTarget — помечаем как removed
+function animateTarget(target) {
+  if (!target.dom) return;
+
+  target.x += target.speed;
+  const drift = Math.sin(target.angle) * 35;
+  target.y = Math.max(10, Math.min(85, target.y + drift * 0.02));
+  target.angle += 0.08;
+  target.dom.style.transform = `translateX(${target.x}vw) translateY(${target.y}%)`;
+
+  // Если цель улетела — помечаем, но не удаляем сразу из STATE
+  if (target.x > 105) {
+    markAsRemoved(target);
+    return;
+  }
+
+  requestAnimationFrame(() => animateTarget(target));
+}
+
+function markAsRemoved(target) {
+  STATE.removedTargets.push(target.id);
+  if (target.dom && target.dom.parentNode) {
+    target.dom.remove();
+  }
+  // Не удаляем из activeTargets сразу — пусть клик найдёт её ещё пару секунд
+}
+
+
+  function load() {
+    const saved = localStorage.getItem('rcbaing_floor_pvo');
+    if (saved) {
+      const data = JSON.parse(saved);
+      STATE.score = data.score || 0;
+      STATE.intercepted = data.intercepted || { missile: 0, drone: 0, orb: 0 };
+    }
+    updateUI();
+    spawnTarget();
+  }
+
+  function save() {
+    localStorage.setItem('rcbaing_floor_pvo', JSON.stringify(STATE));
+  }
+
+  function updateUI() {
+    const scoreEl = document.getElementById('score-display');
+    if (scoreEl) scoreEl.textContent = STATE.score;
+
+    Object.keys(TYPES).forEach(t => {
+      const el = document.getElementById(`stat-${t}`);
+      if (el) el.textContent = STATE.intercepted[t];
+    });
+  }
+
+  function spawnTarget() {
+    let type;
+    const r = Math.random();
+    if (r < 0.04) type = 'orb';
+    else if (r < 0.25) type = 'drone';
+    else type = 'missile';
+
+    const t = TYPES[type];
+    const target = {
+      id: Date.now() + Math.random(),
+      type,
+      x: -60,
+      y: (Math.random() * 70) + 15,
+      angle: Math.random() * Math.PI * 2,
+      speed: t.baseSpeed * (0.8 + Math.random() * 0.5),
+      driftSpeed: t.driftSpeed,
+      width: 28 + Math.random() * 18,
+      height: 20
+    };
+    STATE.activeTargets.push(target);
+
+    const el = document.createElement('div');
+    el.className = 'pvo-target';
+    el.style.backgroundColor = t.color;
+    el.style.width = target.width + 'px';
+    el.style.height = target.height + 'px';
+    el.style.left = target.x + 'vw';
+    el.style.top = target.y + '%';
+    el.dataset.id = target.id;
+
+    // Подсказка с названием
+    const tooltip = document.createElement('div');
+    tooltip.className = 'pvo-tooltip';
+    tooltip.textContent = t.name;
+    el.appendChild(tooltip);
+
+    const track = document.getElementById('pvo-track');
+    if (!track) return;
+    track.appendChild(el);
+    target.dom = el;
+
+    animateTarget(target);
+  }
+
+  function animateTarget(target) {
+    if (!target.dom) return;
+
+    target.x += target.speed;
+
+    const drift = Math.sin(target.angle) * 35;
+    target.y = Math.max(10, Math.min(85, target.y + drift * 0.02));
+    target.angle += 0.08;
+
+    target.dom.style.transform = `translateX(${target.x}vw) translateY(${target.y}%)`;
+
+
+
+    requestAnimationFrame(() => animateTarget(target));
+  }
+
+  function intercept(target) {
+    console.log('[PVO] Попытка перехвата:', target.type);
+    if (STATE.isCooldown) {
+      console.log('[PVO] Перезарядка активна — перехват заблокирован');
+      return;
+    }
+
+    const t = TYPES[target.type];
+    STATE.score += t.points;
+    STATE.intercepted[target.type]++;
+    save();
+    updateUI();
+
+    STATE.isCooldown = true;
+    showCooldownIndicator(true);
+
+    setTimeout(() => {
+      STATE.isCooldown = false;
+      showCooldownIndicator(false);
+    }, STATE.cooldownTime);
+
+    removeTarget(target, true);
+  }
+
+  function removeTarget(target, isIntercepted) {
+    STATE.activeTargets = STATE.activeTargets.filter(t => t.id !== target.id);
+    if (target.dom && target.dom.parentNode) {
+      target.dom.remove();
+    }
+
+    if (isIntercepted) {
+      const flash = document.createElement('div');
+      flash.className = 'pvo-flash';
+      flash.style.left = (target.x + 15) + 'vw';
+      flash.style.top = (target.y + 5) + '%';
+      document.getElementById('pvo-track').appendChild(flash);
+      setTimeout(() => flash.remove(), 200);
+    }
+  }
+
+  function showCooldownIndicator(active) {
+    const hint = document.getElementById('hint-text');
+    if (!hint) return;
+    hint.textContent = active
+      ? 'Орудие на перезарядке…'
+      : 'Кликни по цели, чтобы перехватить';
+    hint.className = active ? 'pvo-hint cooldown-active' : 'pvo-hint';
+  }
+
+  // Делегированный обработчик клика — самый надёжный вариант
+  const track = document.getElementById('pvo-track');
+  if (track) {
+    track.addEventListener('mousedown', (e) => {
+      const targetEl = e.target.closest('.pvo-target');
+      if (!targetEl) {
+        // Клик был мимо цели — нормально
+        return;
+      }
+      console.log('[PVO] Клик по цели:', targetEl.dataset.id);
+
+      const id = parseInt(targetEl.dataset.id, 10);
+      const target = STATE.activeTargets.find(t => t.id === id);
+      if (!target) {
+        console.error('[PVO] Цель не найдена в STATE (уже удалена анимацией)');
+        return;
+      }
+
+      intercept(target);
+    });
+  } else {
+    console.error('[PVO] Элемент #pvo-track не найден!');
+  }
+
+  setInterval(spawnTarget, 0 + Math.random() * 1200);
+
+  load();
+})();
+console.log('True get script')
+</script>
+
+</body>
+</html>

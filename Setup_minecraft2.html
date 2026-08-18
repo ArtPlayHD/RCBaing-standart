@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Скачать Minecraft от ArtPlayHD</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body id="Minecraft_page">
+
+  <!-- Музыка -->
+  <audio src="music2.mp3" autoplay loop></audio>
+
+  <!-- Кнопки навигации -->
+  <button id="exit" onclick="window.location.href='Standart_index.html'">X</button>
+  <a id="MS" href="https://minecraft.net/ru-ru" target="_blank" style="margin-left: 10px;">Перейти на сайт Minecraft</a>
+
+  <img src="mje.jpg" alt="Обложка Minecraft">
+  <h1>Инсталляция MINECRAFT</h1>
+  <h2>Mojang Minecraft Java Edition</h2>
+  <p>Нажмите кнопку «Скачать», чтобы начать загрузку.</p>
+
+  <p>Minecraft — популярная игра-песочница. Сражайтесь с монстрами, стройте дома, добывайте ресурсы, торгуйте с жителями и победите дракона Эндера для прохождения игры!</p>
+
+  <h2>Это версия приложения для операционной системы Windows</h2>
+
+  <img src="Minecraft.jpg" alt="Minecraft">
+  <h3>Photo by Minecraft</h3>
+
+  <img src="2026-01-06_16.26.19.png" alt="Скриншот">
+  <h4>Также в игре доступен многопользовательский режим. Вы можете выбрать: сражаться с монстрами и выживать или поиграть в мини‑игры. Мини‑игры могут быть разными: от BedWars и SkyWars до обычного выживания с плюшками.</h4>
+  <h4>Также есть очень интересная анархия.</h4>
+
+  <h3>Серверы дня: Hipemc.pro</h3>
+  <img src="2026-01-20_20.31.30.png" alt="Сервер">
+
+  <h2 id="Dtext">Скачать можно здесь</h2>
+
+  <!-- Кнопка скачивания через JS (реальное скачивание файла) -->
+  <button id="download" onclick="triggerDownload('installer_minecraft.exe')">Скачать установщик Minecraft</button>
+
+  <h3>Видео от Нубика и Про</h3>
+  <video id="VBM" src="video_940029.mp4" controls></video>
+
+  <script>
+    // Проверка блокировки страницы
+    if (localStorage.getItem('open/close') === '0') {
+      window.alert('Страница закрыта.');
+      window.location.href = 'Page_close.html';
+      // Дальше скрипт не выполняется — страница уходит на Page_close.html
+    }
+
+    function triggerDownload(fileName) {
+      const element = document.createElement('a');
+      element.setAttribute('href', fileName);
+      element.setAttribute('download', fileName);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+
+      localStorage.setItem('Message', 'Был скачан установщик Minecraft');
+      console.log('Скачивание запущено:', fileName);
+    }
+  </script>
+</body>
+</html>

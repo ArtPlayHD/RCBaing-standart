@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Музыка | RCBaing</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --muted: #a0a0b0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      color: var(--accent);
+      text-align: center;
+      text-shadow: 0 0 12px rgba(255,107,129,0.3);
+    }
+
+    /* Блок поиска */
+    .search-block {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+    }
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 2px 8px rgba(255,107,129,0.2);
+    }
+
+    button.search-btn {
+      padding: 0 22px;
+      background: var(--accent);
+      color: black;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.1s, filter 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button.search-btn:hover {
+      filter: brightness(1.1);
+      transform: scale(1.03);
+      background: #ff4757;
+    }
+    button.search-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Сетка кнопок треков */
+    .music-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .track-btn {
+      cursor: pointer;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-align: left;
+      line-height: 1.4;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .track-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.03);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .track-btn:hover::before {
+      opacity: 1;
+    }
+    .track-btn:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 8px 28px rgba(255,107,129,0.15);
+    }
+    .track-btn:active {
+      transform: scale(0.97);
+    }
+
+    img.cover {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+    }
+  </style>
+</head>
+<body>
+  <h1>🎧 Музыка</h1>
+
+  
+
+  <div class="search-block">
+    <input type="text" id="searchInput" placeholder="Например: Шатунов, Белые розы, Победа…">
+    <button class="search-btn" onclick="performSearch()">
+      🔍 Найти
+    </button>
+  </div>
+
+  <div class="music-grid">
+    <button class="track-btn" onclick="window.location.href='SNSAL.html'">
+      🎵 «Каждому своё»
+    </button>
+    <button class="track-btn" onclick="window.location.href='DM9may.html'">
+      🎵 «Это день победы»
+    </button>
+    <button class="track-btn" onclick="window.location.href='ISSNITEDY.html'">
+      🎵 «Седая ночь»
+    </button>
+    <button class="track-btn" onclick="window.location.href='NTZSNZM.html'">
+      🎵 «Белые розы»
+    </button>
+    <button class="track-btn" onclick="window.location.href='CTOEN.html'">
+      🎵 «Что такое осень»
+    </button>
+  </div>
+
+  <script>
+    function performSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) return;
+
+      if (query.includes('день победы') || query.includes('победа')) {
+        window.location.href = 'DM9may.html';
+      } else if (query.includes('седая ночь')) {
+        window.location.href = 'ISSNITEDY.html';
+      } else if (query.includes('белые розы')) {
+        window.location.href = 'NTZSNZM.html';
+      } else if (query.includes('каждому своё')) {
+        window.location.href = 'SNSAL.html';
+      } else if (query.includes('что такое осень')) {
+        window.location.href = 'CTOEN.html';
+      } else if (query.includes('шатунов') || query.includes('юрий')) {
+        window.location.href = 'ALBOMYUSHEOM.html';
+      } else {
+        alert('Не найдено. Попробуйте ввести название песни или фамилию артиста (например: "Шатунов" или "Белые розы").');
+      }
+    }
+  </script>
+  <script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba',
+	  'rcbaing': '#171717'
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+</body>

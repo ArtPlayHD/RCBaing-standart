@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Minecraft - RCBAing Edition (3D)</title>
+  <style>
+    :root {
+      --bg: #12121a;
+      --panel: #1e1e28;
+      --accent: #8e44ad;
+      --text: #f1c40f;
+    }
+    body { margin: 0; overflow: hidden; background: var(--bg); color: white; font-family: sans-serif; }
+    #hud {
+      position: absolute; top: 20px; left: 20px; pointer-events: none; z-index: 10;
+    }
+    .stat-row {
+      background: rgba(0,0,0,0.6); padding: 8px 14px; border-radius: 6px;
+      border: 1px solid #333; color: var(--text); margin-bottom: 6px; font-weight: bold;
+    }
+    #crosshair {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 16px; height: 16px; pointer-events: none;
+    }
+    .dot { position: absolute; width: 2px; height: 2px; background: white; left: 7px; top: 7px; }
+    .line-h, .line-v { position: absolute; background: rgba(255,255,255,0.5); }
+    .line-h { left: 0; top: 7px; width: 100%; height: 1px; }
+    .line-v { left: 7px; top: 0; width: 1px; height: 100%; }
+    #lock-btn {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      padding: 16px 32px; font-size: 18px; background: var(--accent); color: white;
+      border: none; border-radius: 8px; cursor: pointer; z-index: 20;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="hud">
+    <div class="stat-row">Алмазы: <span id="stat-diamond">0</span></div>
+    <div class="stat-row">Железо: <span id="stat-iron">0</span></div>
+    <div class="stat-row">Уголь: <span id="stat-coal">0</span></div>
+  </div>
+
+  <div id="crosshair">
+    <div class="dot"></div>
+    <div class="line-h"></div>
+    <div class="line-v"></div>
+  </div>
+
+  <button id="lock-btn">Войти в мир RCBAing (Minecraft)</button>
+
+  <!-- Подключаем Three.js и аддоны через CDN -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+    import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+
+    const BLOCK_SIZE = 1;
+    const WORLD_SIZE = { x: 10, y: 5, z: 10 };
+    const BLOCK_TYPES = [
+      { id: 'air', color: 0x000000, visible: false },
+      { id: 'stone', color: 0x5e5e66, name: 'Камень' },
+      { id: 'coal', color: 0x111111, name: 'Уголь' },
+      { id: 'iron', color: 0x8f949a, name: 'Железо' },
+      { id: 'gold', color: 0xf1c40f, name: 'Золото' },
+      { id: 'diamond', color: 0x3498db, name: 'Алмаз' },
+      { id: 'wood', color: 0x8f7148, name: 'Дерево' },
+      { id: 'dirt', color: 0x6f4e37, name: 'Земля' },
+      { id: 'grass', color: 0x2ecc71, name: 'Трава' },
+      { id: 'obsidian', color: 0x0f0f11, name: 'Обсидиан' }
+    ];
+
+    let scene, camera, renderer, controls;
+    let worldBlocks = [];
+    let player = { x: WORLD_SIZE.x / 2, y: WORLD_SIZE.y, z: WORLD_SIZE.z / 2 };
+    let inventory = { diamond: 0, iron: 0, coal: 0, stone: 0 };
+
+    function loadGame() {
+      const saved = localStorage.getItem('rcbaing_minecraft_3d');
+      if (saved) {
+        const data = JSON.parse(saved);
+        worldBlocks = data.worldBlocks;
+        inventory = data.inventory;
+        player = data.player;
+      } else {
+        generateWorld();
+      }
+    }
+
+    function saveGame() {
+      localStorage.setItem('rcbaing_minecraft_3d', JSON.stringify({ worldBlocks, inventory, player }));
+    }
+
+    function generateWorld() {
+      worldBlocks = [];
+      for (let x = 0; x < WORLD_SIZE.x; x++) {
+        for (let y = 0; y < WORLD_SIZE.y; y++) {
+          for (let z = 0; z < WORLD_SIZE.z; z++) {
+            let typeId = 'stone';
+            if (y === WORLD_SIZE.y - 1 && Math.random() < 0.6) typeId = 'grass';
+            else if (y === WORLD_SIZE.y - 2 && Math.random() < 0.5) typeId = 'dirt';
+
+            if (Math.random() < 0.08 && y < WORLD_SIZE.y - 1) {
+              if (Math.random() < 0.05) typeId = 'diamond';
+              else if (Math.random() < 0.3) typeId = 'gold';
+              else if (Math.random() < 0.6) typeId = 'iron';
+              else typeId = 'coal';
+            }
+            worldBlocks.push({ x, y, z, typeId });
+          }
+        }
+      }
+      player = { x: WORLD_SIZE.x / 2, y: WORLD_SIZE.y, z: WORLD_SIZE.z / 2 };
+      inventory = { diamond: 0, iron: 0, coal: 0, stone: 0 };
+      saveGame();
+    }
+
+    function buildWorld() {
+      scene.clear();
+
+      const floorGeo = new THREE.PlaneGeometry(WORLD_SIZE.x * 2, WORLD_SIZE.z * 2);
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22 });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = -0.1;
+      scene.add(floor);
+
+      const blockGeo = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      blockGeo.computeVertexNormals();
+
+      worldBlocks.forEach(b => {
+        if (b.typeId === 'air') return;
+        const blockType = BLOCK_TYPES.find(t => t.id === b.typeId);
+        const mat = new THREE.MeshStandardMaterial({ color: blockType.color });
+        const mesh = new THREE.Mesh(blockGeo, mat);
+        mesh.position.set(
+          b.x * BLOCK_SIZE - WORLD_SIZE.x/2 + 0.5,
+          b.y * BLOCK_SIZE - 0.5,
+          b.z * BLOCK_SIZE - WORLD_SIZE.z/2 + 0.5
+        );
+        scene.add(mesh);
+      });
+      updateHUD();
+    }
+
+    let handMesh, toolMesh;
+    function createHandAndTool() {
+      const handGeo = new THREE.CapsuleGeometry(0.15, 0.4, 4, 8);
+      const handMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+      handMesh = new THREE.Mesh(handGeo, handMat);
+      handMesh.position.set(1.2, -0.6, -0.8);
+      scene.add(handMesh);
+
+      const toolGeo = new THREE.CylinderGeometry(0.06, 0.04, 0.6, 8);
+      const toolMat = new THREE.MeshStandardMaterial({ color: 0x8e44ad });
+      toolMesh = new THREE.Mesh(toolGeo, toolMat);
+      toolMesh.position.set(0.2, 0, 0);
+      toolMesh.rotation.z = Math.PI / 2;
+      handMesh.add(toolMesh);
+    }
+
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+
+    function onKeyDown(event) {
+      switch (event.code) {
+        case 'ArrowUp': case 'KeyW': moveForward = true; break;
+        case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+        case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+        case 'ArrowRight': case 'KeyD': moveRight = true; break;
+      }
+    }
+
+    function onKeyUp(event) {
+      switch (event.code) {
+        case 'ArrowUp': case 'KeyW': moveForward = false; break;
+        case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+        case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+        case 'ArrowRight': case 'KeyD': moveRight = false; break;
+      }
+    }
+
+    function mineBlock() {
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+      const objects = scene.children.filter(obj => obj.isMesh && obj.visible !== false);
+      const intersects = raycaster.intersectObjects(objects);
+      if (!intersects.length) return;
+
+      const point = intersects[0].point;
+      const bx = Math.floor(point.x + WORLD_SIZE.x/2 - 0.5);
+      const by = Math.floor(point.y + 0.5);
+      const bz = Math.floor(point.z + WORLD_SIZE.z/2 - 0.5);
+
+      const block = worldBlocks.find(b => b.x === bx && b.y === by && b.z === bz);
+      if (!block || block.typeId === 'air') return;
+
+      if (inventory[block.typeId] !== undefined) {
+        inventory[block.typeId]++;
+      } else if (block.typeId === 'stone') {
+        inventory.stone++;
+      }
+
+      block.typeId = 'air';
+      saveGame();
+      buildWorld();
+    }
+
+    function updateHUD() {
+      document.getElementById('stat-diamond').textContent = inventory.diamond;
+      document.getElementById('stat-iron').textContent = inventory.iron;
+      document.getElementById('stat-coal').textContent = inventory.coal;
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (controls.isLocked) {
+        direction.set(0, 0, -1).applyQuaternion(controls.getObject().quaternion);
+        velocity.x = (-moveLeft + moveRight) * 0.12;
+        velocity.z = (-moveForward + moveBackward) * 0.12;
+
+        if (velocity.lengthSq() > 0) {
+          velocity.normalize().multiplyScalar(0.12).applyQuaternion(controls.getObject().quaternion);
+          controls.moveRight(-velocity.x);
+          controls.moveForward(-velocity.z);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    async function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x12121a);
+
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.y = 1.6;
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(5, 10, 7);
+      scene.add(dirLight);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      controls = new PointerLockControls(camera, document.body);
+
+      const lockBtn = document.getElementById('lock-btn');
+      lockBtn.onclick = () => controls.lock();
+
+      controls.addEventListener('lock', () => {
+        lockBtn.style.display = 'none';
+        document.body.addEventListener('keydown', onKeyDown);
+        document.body.addEventListener('keyup', onKeyUp);
+      });
+
+      controls.addEventListener('unlock', () => {
+        document.body.removeEventListener('keydown', onKeyDown);
+        document.body.removeEventListener('keyup', onKeyUp);
+      });
+
+      scene.add(controls.getObject());
+      createHandAndTool();
+
+      loadGame();
+      buildWorld();
+
+      document.addEventListener('mousedown', (e) => {
+        if (controls.isLocked && e.button === 0) mineBlock();
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+
+      animate();
+    }
+
+    init();
+  </script>
+</body>
+</html>

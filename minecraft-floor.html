@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Этаж Minecraft — RCBaing</title>
+  <style>
+    :root {
+      --bg-site: #0f1115;       /* Фон сайта */
+      --panel: #161b22;         /* Панель этажа */
+      --accent: #8e44ad;       /* Фиолетовый акцент (RCBaing) */
+      --text: #f1c40f;          /* Золотой текст */
+      --border: #2a2f39;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: var(--bg-site);
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      color: white;
+    }
+
+    /* --- ИНТЕРФЕЙС ЭТАЖА (НЕ ИГРА) --- */
+    .floor-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--panel);
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .site-title { font-weight: bold; color: var(--text); letter-spacing: 1px; }
+    .nav-links a { color: #aaa; text-decoration: none; margin-left: 16px; font-size: 14px; }
+    .nav-links a:hover { color: white; }
+
+    main { flex: 1; position: relative; }
+
+    /* --- HUD ВНУТРИ ИГРЫ (перекрывает канвас) --- */
+    #hud-layer {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; /* Чтобы клики проходили сквозь HUD */
+      z-index: 5;
+    }
+    #stats-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(22, 27, 34, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      pointer-events: auto;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .stat-label { color: #aaa; }
+    .stat-value { font-weight: bold; color: var(--text); }
+
+    #crosshair {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      pointer-events: none;
+      z-index: 6;
+    }
+    .dot { position: absolute; width: 2px; height: 2px; background: white; top: 9px; left: 9px; }
+    .line-h, .line-v { position: absolute; background: rgba(255,255,255,0.6); }
+    .line-h { top: 9px; left: 0; width: 100%; height: 1px; }
+    .line-v { top: 0; left: 9px; width: 1px; height: 100%; }
+
+    #lock-btn {
+      position: absolute;
+      bottom: 40px; left: 50%;
+      transform: translateX(-50%);
+      padding: 14px 36px;
+      font-size: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(142, 68, 173, 0.4);
+      z-index: 7;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    #lock-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(142, 68, 173, 0.6); }
+    #lock-btn.locked { display: none; }
+
+    canvas#game-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    footer {
+      background: var(--panel);
+      padding: 12px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      z-index: 10;
+    }
+	.canvas{
+	width: 100%; height: 100vh; display: block;
+	}
+	.locked { display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="floor-wrapper">
+    <!-- Шапка сайта (как будто это этаж портала) -->
+    <header>
+      <div class="site-title">RCBaing — Лучший сайт России</div>
+      <nav class="nav-links">
+        <a href="/">Главная</a>
+        <a href="/floor-shop">Магазин</a>
+        <a href="/floor-minecraft" class="active">Minecraft-этаж</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- HUD и интерфейс поверх игры -->
+      <div id="hud-layer">
+        <div id="stats-panel">
+          <div class="stat-row"><span class="stat-label">Алмазы:</span><span class="stat-value" id="stat-diamond">0</span></div>
+          <div class="stat-row"><span class="stat-label">Железо:</span><span class="stat-value" id="stat-iron">0</span></div>
+          <div class="stat-row"><span class="stat-label">Уголь:</span><span class="stat-value" id="stat-coal">0</span></div>
+        </div>
+
+        <div id="crosshair">
+          <div class="dot"></div>
+          <div class="line-h"></div>
+          <div class="line-v"></div>
+        </div>
+
+        <button id="lock-btn">Войти в комнату Minecraft</button>
+      </div>
+
+      <!-- 3D Мир -->
+      <canvas id="game-canvas"></canvas>
+    </main>
+
+    <footer>
+      © 2026 RCBaing. Сделано в России. Все права защищены.
+    </footer>
+  </div>
+
+  <!-- Подключаем Three.js через CDN (работает везде, даже на хостинге) -->
+  <script type="module">
+  import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+import { PointerLockControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/PointerLockControls.js';
+
+// --- КОНФИГУРАЦИЯ ---
+const BLOCK_SIZE = 1;
+const WORLD_SIZE = { x: 12, y: 6, z: 12 }; // «Комната» этажа
+
+const BLOCK_TYPES = [
+  { id: 'air', color: 0x000000, visible: false },
+  { id: 'stone', color: 0x5e5e66, name: 'Камень' },
+  { id: 'coal', color: 0x111111, name: 'Уголь' },
+  { id: 'iron', color: 0x8f949a, name: 'Железо' },
+  { id: 'gold', color: 0xf1c40f, name: 'Золото' },
+  { id: 'diamond', color: 0x3498db, name: 'Алмаз' },
+  { id: 'wood', color: 0x8f7148, name: 'Дерево' },
+  { id: 'dirt', color: 0x6f4e37, name: 'Земля' },
+  { id: 'grass', color: 0x2ecc71, name: 'Трава' },
+  { id: 'obsidian', color: 0x0f0f11, name: 'Обсидиан' }
+];
+
+// --- СОСТОЯНИЕ ---
+let scene, camera, renderer, controls;
+let worldBlocks = [];
+let player = { x: WORLD_SIZE.x / 2, y: WORLD_SIZE.y / 2 + 1, z: WORLD_SIZE.z / 2 };
+let inventory = { diamond: 0, iron: 0, coal: 0, stone: 0 };
+
+// --- ЗАГРУЗКА / СОХРАНЕНИЕ (localStorage) ---
+function loadGame() {
+  const saved = localStorage.getItem('rcbaing_floor_minecraft');
+  if (saved) {
+    const data = JSON.parse(saved);
+    worldBlocks = data.worldBlocks;
+    inventory = data.inventory;
+    player = data.player;
+  } else {
+    generateWorld();
+  }
+}
+
+function saveGame() {
+  localStorage.setItem('rcbaing_floor_minecraft', JSON.stringify({ worldBlocks, inventory, player }));
+}
+
+// --- ГЕНЕРАЦИЯ МИРА (КОМНАТА) ---
+function generateWorld() {
+  worldBlocks = [];
+  for (let x = 0; x < WORLD_SIZE.x; x++) {
+    for (let y = 0; y < WORLD_SIZE.y; y++) {
+      for (let z = 0; z < WORLD_SIZE.z; z++) {
+        let typeId = 'stone'; // Стены из камня
+
+        if (y === 0) typeId = 'dirt'; // Пол
+        if (y === WORLD_SIZE.y - 1) typeId = 'obsidian'; // Потолок
+
+        // Руды внутри стен (редкие)
+        if (y > 0 && y < WORLD_SIZE.y - 1 && Math.random() < 0.05) {
+          if (Math.random() < 0.1) typeId = 'diamond';
+          else if (Math.random() < 0.3) typeId = 'gold';
+          else if (Math.random() < 0.6) typeId = 'iron';
+          else typeId = 'coal';
+        }
+
+        worldBlocks.push({ x, y, z, typeId });
+      }
+    }
+  }
+  player = { x: WORLD_SIZE.x / 2, y: WORLD_SIZE.y / 2 + 1, z: WORLD_SIZE.z / 2 };
+  inventory = { diamond: 0, iron: 0, coal: 0, stone: 0 };
+  saveGame();
+}
+
+// --- ОТРИСОВКА МИРА ---
+function buildWorld() {
+  scene.clear();
+
+  // Пол
+  const floorGeo = new THREE.PlaneGeometry(WORLD_SIZE.x * 1.5, WORLD_SIZE.z * 1.5);
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1a22 });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -0.1;
+  scene.add(floor);
+
+  // Блоки
+  const blockGeo = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+  blockGeo.computeVertexNormals();
+
+  worldBlocks.forEach(b => {
+    if (b.typeId === 'air') return;
+    const blockType = BLOCK_TYPES.find(t => t.id === b.typeId);
+    const mat = new THREE.MeshStandardMaterial({ color: blockType.color });
+    const mesh = new THREE.Mesh(blockGeo, mat);
+    mesh.position.set(
+      b.x * BLOCK_SIZE - WORLD_SIZE.x/2 + 0.5,
+      b.y * BLOCK_SIZE - 0.5,
+      b.z * BLOCK_SIZE - WORLD_SIZE.z/2 + 0.5
+    );
+    scene.add(mesh);
+  });
+  updateHUD();
+}
+
+// --- РУКА И ИНСТРУМЕНТ ---
+let handMesh, toolMesh;
+function createHandAndTool() {
+  const handGeo = new THREE.CapsuleGeometry(0.15, 0.4, 4, 8);
+  const handMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+  handMesh = new THREE.Mesh(handGeo, handMat);
+  handMesh.position.set(1.2, -0.6, -0.8);
+  scene.add(handMesh);
+
+  const toolGeo = new THREE.CylinderGeometry(0.06, 0.04, 0.6, 8);
+  const toolMat = new THREE.MeshStandardMaterial({ color: 0x8e44ad }); // фиолетовый под RCBaing
+  toolMesh = new THREE.Mesh(toolGeo, toolMat);
+  toolMesh.position.set(0.2, 0, 0);
+  toolMesh.rotation.z = Math.PI / 2;
+  handMesh.add(toolMesh);
+}
+
+// --- УПРАВЛЕНИЕ ---
+let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+const velocity = new THREE.Vector3();
+
+function onKeyDown(event) {
+  switch (event.code) {
+    case 'ArrowUp': case 'KeyW': moveForward = true; break;
+    case 'ArrowDown': case 'KeyS': moveBackward = true; break;
+    case 'ArrowLeft': case 'KeyA': moveLeft = true; break;
+    case 'ArrowRight': case 'KeyD': moveRight = true; break;
+  }
+}
+
+function onKeyUp(event) {
+  switch (event.code) {
+    case 'ArrowUp': case 'KeyW': moveForward = false; break;
+    case 'ArrowDown': case 'KeyS': moveBackward = false; break;
+    case 'ArrowLeft': case 'KeyA': moveLeft = false; break;
+    case 'ArrowRight': case 'KeyD': moveRight = false; break;
+  }
+}
+
+// --- ДОБЫЧА (RAYCAST) ---
+function mineBlock() {
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+  const objects = scene.children.filter(obj => obj.isMesh);
+  const intersects = raycaster.intersectObjects(objects);
+  if (!intersects.length) return;
+
+  const point = intersects[0].point;
+  const bx = Math.floor(point.x + WORLD_SIZE.x/2 - 0.5);
+  const by = Math.floor(point.y + 0.5);
+  const bz = Math.floor(point.z + WORLD_SIZE.z/2 - 0.5);
+
+  const block = worldBlocks.find(b => b.x === bx && b.y === by && b.z === bz);
+  if (!block || block.typeId === 'air') return;
+
+  if (inventory[block.typeId] !== undefined) {
+    inventory[block.typeId]++;
+  } else if (block.typeId === 'stone') {
+    inventory.stone++;
+  }
+
+  block.typeId = 'air';
+  saveGame();
+  buildWorld();
+}
+
+// --- HUD (обновление статистики) ---
+function updateHUD() {
+  const elD = document.getElementById('stat-diamond');
+  const elI = document.getElementById('stat-iron');
+  const elC = document.getElementById('stat-coal');
+  if (elD) elD.textContent = inventory.diamond;
+  if (elI) elI.textContent = inventory.iron;
+  if (elC) elC.textContent = inventory.coal;
+}
+
+// --- ИГРОВОЙ ЦИКЛ ---
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (controls.isLocked) {
+    velocity.x = (-moveLeft + moveRight) * 0.12;
+    velocity.z = (-moveForward + moveBackward) * 0.12;
+
+    if (velocity.lengthSq() > 0) {
+      velocity.normalize().multiplyScalar(0.12).applyQuaternion(controls.getObject().quaternion);
+      controls.moveRight(-velocity.x);
+      controls.moveForward(-velocity.z);
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+// --- ИНИЦИАЛИЗАЦИЯ ---
+async function init() {
+  // Сцена
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x12121a);
+
+  // Камера
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.y = 1.6;
+
+  // Свет
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambientLight);
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(5, 10, 7);
+  scene.add(dirLight);
+
+  // Рендерер
+  const canvas = document.getElementById('game-canvas');
+  renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+
+  // Controls
+  controls = new PointerLockControls(camera, document.body);
+
+  const lockBtn = document.getElementById('lock-btn');
+  lockBtn.onclick = () => controls.lock();
+
+  controls.addEventListener('lock', () => {
+    lockBtn.classList.add('locked');
+    document.body.addEventListener('keydown', onKeyDown);
+    document.body.addEventListener('keyup', onKeyUp);
+  });
+
+  controls.addEventListener('unlock', () => {
+    document.body.removeEventListener('keydown', onKeyDown);
+    document.body.removeEventListener('keyup', onKeyUp);
+  });
+
+  scene.add(controls.getObject());
+  createHandAndTool();
+
+  loadGame();
+  buildWorld();
+
+  document.addEventListener('mousedown', (e) => {
+    if (controls.isLocked && e.button === 0) mineBlock();
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  animate();
+}
+
+init();
+
+ </script>
+ </body>
+ </html>

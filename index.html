@@ -1,0 +1,170 @@
+ <!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Перенаправление</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f1220 0%, #1a1f3a 100%);
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text-main: #ffffff;
+      --text-muted: #a0a0b0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Декоративные частицы (лёгкий эффект «пылинок») */
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: float linear infinite;
+    }
+
+    .p1 { width: 12px; height: 12px; top: 20%; left: 15%; animation-duration: 8s; animation-delay: 0s; }
+    
+ 
+	.p3 { width: 10px; height: 10px; bottom: 25%; left: 35%; animation-duration: 10s; animation-delay: 4s; }
+    .p4 { width: 6px; height: 6px; top: 50%; right: 10%; animation-duration: 9s; animation-delay: 1s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    .loader-container {
+      position: relative;
+      z-index: 10;
+      width: 240px;
+      height: 240px;
+      border-radius: 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.2);
+      border-top: 4px solid var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .progress-bar-wrapper {
+      margin-top: 20px;
+      width: 180px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.4s ease-out;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Декоративные частицы -->
+  <div class="particle p1"></div>
+  <div class="particle p2"></div>
+  <div class="particle p3"></div>
+  <div class="particle p4"></div>
+
+  <div class="loader-container">
+    <div class="spinner"></div>
+    <h2>Перенаправление...</h2>
+    <p id="date-info">Определяем дату</p>
+    <div class="progress-bar-wrapper">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+  <script>
+    function getRedirectPage(date) {
+      const day = date.getDate();
+      const month = date.getMonth(); // 0 = январь, 11 = декабрь
+
+      // 9 мая
+      if (day === 9 && month === 4) {
+        return 'index9may.html';
+      }
+
+      // 1 мая
+      if (day === 1 && month === 4) {
+        return '1may_index.html';
+      }
+
+      // 12 июня
+      if (day === 12 && month === 5) {
+        return '12june_index.html';
+      }
+
+      // 30 декабря
+      if (day === 30 && month === 11) {
+        return '30December_index.html';
+      }
+
+      return 'Standart_index.html';
+    }
+
+    const now = new Date();
+    const targetPage = getRedirectPage(now);
+    window.location.href = targetPage;
+  </script>
+</body>
+</html>

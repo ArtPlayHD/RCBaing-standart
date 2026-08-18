@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Регистрация — RCBaing</title>
+  
+  <!-- Стили прямо в head (в стиле RCBaing) -->
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --muted: #a0a0b0;
+      --error: #ff4757;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .reg-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 32px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+    }
+	#BODY_REG{
+		background-image: url('reg.jpg');
+	
+	
+	}
+    h1 {
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      box-sizing: border-box; /* чтобы padding не ломал ширину */
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.2);
+    }
+
+    input.error {
+      border-color: var(--error);
+      background: rgba(255, 71, 87, 0.1);
+      color: var(--error);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.85rem;
+      margin-top: 6px;
+      display: none; /* скрыто по умолчанию */
+      text-align: left;
+    }
+
+    .error-message.visible {
+      display: block;
+    }
+
+    button#reg {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    button#reg:hover {
+      background: #ff536d;
+      transform: translateY(-1px);
+    }
+
+    button#reg:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body id="BODY_REG">
+
+  <div class="reg-container">
+    <h1 id="REG_TEXT">Регистрация</h1>
+
+    <div class="input-group">
+      <input type="text" id="userName" placeholder="Введите имя">
+      <div id="nameError" class="error-message">Имя не может быть пустым</div>
+    </div>
+
+    <div class="input-group">
+      <input type="email" id="userMail" placeholder="Введите Эл. почту">
+      <div id="mailError" class="error-message">Укажите корректный email</div>
+    </div>
+
+    <div class="input-group">
+      <input type="tel" id="userPH" placeholder="Введите номер телефона">
+      <div id="phError" class="error-message">Номер телефона не может быть пустым</div>
+    </div>
+
+    <button id="reg" onclick="Sign_in()">Войти / Зарегистрироваться</button>
+  </div>
+<script>
+  function Sign_in() {
+    const nameInput = document.getElementById('userName');
+    const mailInput = document.getElementById('userMail');
+    const phInput = document.getElementById('userPH');
+
+    const nameError = document.getElementById('nameError');
+    const mailError = document.getElementById('mailError');
+    const phError = document.getElementById('phError');
+
+    // Сбрасываем ошибки
+    nameInput.classList.remove('error');
+    mailInput.classList.remove('error');
+    phInput.classList.remove('error');
+    nameError.classList.remove('visible');
+    mailError.classList.remove('visible');
+    phError.classList.remove('visible');
+
+    let isValid = true;
+
+    // Проверка имени
+    if (!nameInput.value.trim()) {
+      nameInput.classList.add('error');
+      nameError.classList.add('visible');
+      isValid = false;
+    }
+
+    // Проверка почты (простая валидация через @)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!mailInput.value.trim() || !emailRegex.test(mailInput.value)) {
+      mailInput.classList.add('error');
+      mailError.classList.add('visible');
+      isValid = false;
+    }
+
+    // Проверка телефона (минимум 10 символов)
+    if (!phInput.value.trim() || phInput.value.replace(/\D/g, '').length < 10) {
+      phInput.classList.add('error');
+      phError.classList.add('visible');
+      isValid = false;
+    }
+
+    if (isValid) {
+      // Сохраняем данные
+      localStorage.setItem('name', nameInput.value.trim());
+      localStorage.setItem('mail', mailInput.value.trim());
+      localStorage.setItem('PH', phInput.value.trim());
+
+      // Переход на страницу профиля
+      window.location.href = 'Your_page.html';
+    } else {
+      alert('Исправьте ошибки в форме перед регистрацией.');
+    }
+  }
+</script>
+
+

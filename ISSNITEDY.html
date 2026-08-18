@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Плеер | RCBaing</title>
+
+  <!-- Твой внешний стиль (если есть) -->
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Контейнер плеера */
+    .music-player {
+      width: 360px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Область обложки */
+    .cover-area {
+      height: 300px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    .album-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.9);
+      transition: transform 5s ease-in-out;
+    }
+
+    .cover-area:hover .album-cover {
+      transform: scale(1.05);
+    }
+
+    /* Декоративная пульсация */
+    .pulse-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 120%; height: 120%;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(255,107,129,0.6);
+      border-radius: 50%;
+      animation: pulse-anim 3s infinite ease-in-out;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    @keyframes pulse-anim {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+      100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+    }
+
+    /* Информация о треке */
+    .track-details {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .song-name {
+      margin: 0 0 4px 0;
+      font-size: 1.2rem;
+      color: var(--text);
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .artist-name {
+      margin: 0 0 8px 0;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .genre-tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.06);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Панель управления */
+    .controls-bar {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .control-btn {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.3rem;
+      transition: color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .control-btn:hover {
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .play-pause-btn {
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: black;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .play-pause-btn:hover {
+      background: #ff4757;
+      transform: none;
+    }
+
+    /* Полоса прогресса (упрощённая) */
+    .progress-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .time-display {
+      font-size: 0.75rem;
+      color: #888;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="music-player">
+    <!-- Обложка и эффект -->
+    <div class="cover-area">
+      <img src="YUSHISSNITEDY.jpg" alt="Обложка" class="album-cover">
+      <div class="pulse-ring"></div>
+    </div>
+
+    <!-- Информация -->
+    <div class="track-details">
+      <h2 class="song-name">Седая ночь</h2>
+      <p class="artist-name">Юрий Шатунов</p>
+      <span class="genre-tag">Песни СССР</span>
+    </div>
+
+    <!-- Управление -->
+    <div class="controls-bar">
+      <button class="control-btn" onclick="skipPrev()">⏮</button>
+      
+      <div class="progress-container">
+        <span class="time-display" id="currentTime">0:00</span>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="time-display" id="totalTime">3:35</span>
+      </div>
+
+      <button class="control-btn" onclick="skipNext()">⏭</button>
+    </div>
+
+    <div style="padding: 0 20px 15px;">
+      <button class="play-pause-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+    </div>
+  </div>
+
+  <!-- Скрытый аудио элемент (управляется JS) -->
+  <audio id="DM9M1WC" src="Юрий Шатунов - Седая ночь (zaycev.net).mp3"></audio>
+  
+  <script>
+    const audio = document.getElementById('DM9M1WC');
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const progressFill = document.getElementById('progressFill');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl = document.getElementById('totalTime');
+
+    // Текущее состояние
+    let isPlaying = false;
+
+    function togglePlay() {
+      if (isPlaying) {
+        audio.pause();
+        playPauseBtn.textContent = '▶';
+        isPlaying = false;
+      } else {
+        audio.play();
+        playPauseBtn.textContent = '⏸';
+        isPlaying = true;
+      }
+    }
+
+    // Обновление прогресс-бара
+    audio.addEventListener('timeupdate', () => {
+      const current = audio.currentTime;
+      const duration = audio.duration;
+      
+      if (duration) {
+        const percent = (current / duration) * 100;
+        progressFill.style.width = percent + '%';
+
+        // Форматирование времени (0:00)
+        const formatTime = (sec) => {
+          const minutes = Math.floor(sec / 60);
+          const seconds = Math.floor(sec % 60);
+          return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        };
+
+        currentTimeEl.textContent = formatTime(current);
+        totalTimeEl.textContent = formatTime(duration);
+      }
+    });
+
+    // Конец трека
+    audio.addEventListener('ended', () => {
+      playPauseBtn.textContent = '▶';
+      isPlaying = false;
+      progressFill.style.width = '0%';
+      currentTimeEl.textContent = '0:00';
+    });
+
+    // Кнопки переключения (заглушки - сюда можно добавить логику смены треков)
+    function skipPrev() {
+      alert('Функция переключения на предыдущий трек в разработке');
+      // audio.currentTime = 0; // Пример сброса
+    }
+
+    function skipNext() {
+      
+      audio.src = 'новый_файл.mp3'; audio.load(); // Пример смены
+    }
+  </script>
+  <script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba'
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+
+</body>
+</html>

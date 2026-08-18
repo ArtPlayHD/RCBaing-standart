@@ -1,0 +1,48 @@
+
+<link rel="stylesheet" type="text/css"href="style.css">
+<dialog id="open.close">
+
+</dialog>
+<dialog id="password_d">
+	
+
+	<button id="search" onclick=Search()>Поиск</button>
+	<input type="text" id="userSearch" placeholder="Введите пароль">
+</dialog>
+<body>
+<button onclick="Openclose()">Закрыть страницу</button>
+
+</body>
+<script>
+document.getElementById('password_d').show()
+// Получаем доступ к полю ввода
+const userSearch = document.getElementById('userSearch');
+
+// Добавляем обработчик события input
+userSearch.addEventListener('input', function() {
+  // Проверяем, не пусто ли поле
+
+    // Введённое имя
+    const password_d = userSearch.value;
+
+    // Можно дальше обрабатывать ввод...
+	localStorage.setItem('password_d',password_d);
+	
+  
+});	
+function Search(){
+	var search = localStorage.getItem('password_d');
+	if(search=="ea77926ae23f"){
+		document.getElementById('password_d').close()
+	}
+	else{
+		
+	}
+	
+	
+}
+function Openclose(){
+	document.getElementById('open.close').show();
+	
+}
+</script>

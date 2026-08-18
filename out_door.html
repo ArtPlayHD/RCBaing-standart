@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ant Empire: Двор</title>
+  <style>
+    :root {
+      --bg-color: #f5e6c8;
+      --ground: #8b6f4e;
+      --wood: #5d4037;
+      --gold: #c0a86b;
+      --green: #4e7339;
+      --red: #d35400;
+      --blue: #3498db;
+    }
+
+    body {
+      margin: 0;
+      padding: 10px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      overflow-x: hidden; /* Чтобы точки не ломали ширину */
+    }
+
+    /* Навигация */
+    .top-nav {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--wood);
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .ally-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.9);
+      padding: 8px 16px;
+      border: 2px solid var(--wood);
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      font-weight: bold;
+      color: var(--wood);
+    }
+
+    .resources-row {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .res-box {
+      background: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      min-width: 110px;
+      text-align: center;
+      border: 1px solid var(--ground);
+    }
+    .res-icon { font-size: 1.3rem; }
+    .res-val { font-weight: bold; font-size: 1.1rem; color: var(--wood); }
+
+    /* Сетка зданий */
+    .yard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: 0 auto 40px auto;
+    }
+
+    .building-card {
+      background: #fff;
+      border: 2px solid var(--wood);
+      border-radius: 14px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: var(--wood); }
+    .lvl-badge { background: var(--gold); color: #222; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
+
+    .progress-wrapper { height: 8px; background: #e0e0e0; border-radius: 4px; margin: 12px 0; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #f1c40f); width: 0%; transition: width 0.3s ease; }
+
+    .timer-line { color: var(--red); font-weight: 600; margin-bottom: 10px; text-align: center; min-height: 22px; }
+    .cost-line { font-size: 0.85rem; color: #555; line-height: 1.4; margin-bottom: 14px; word-break: break-word; }
+
+    .btn-group { display: flex; flex-direction: column; gap: 8px; }
+    button.btn-upgrade, button.btn-collect {
+      width: 100%; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
+    }
+    button.btn-upgrade { background: var(--wood); color: white; }
+    button.btn-upgrade:hover:not(:disabled) { background: #795548; }
+    button.btn-upgrade:disabled { opacity: 0.6; cursor: not-allowed; background: #ccc; }
+    button.btn-collect { background: var(--green); color: white; margin-top: 8px; }
+    button.btn-collect:hover { background: #436a2e; }
+
+    /* Модальное окно */
+    #upgrade-modal {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; padding: 24px; border-radius: 16px; width: 90%; max-width: 420px; text-align: center; position: relative;
+    }
+    .close-modal { position: absolute; right: 16px; top: 14px; font-size: 1.5rem; cursor: pointer; color: #666; }
+    .stat-row { margin: 12px 0; text-align: left; }
+    .stat-label { color: #555; font-weight: 500; }
+    .stat-value { color: var(--wood); font-weight: 700; }
+    .confirm-btn { width: 100%; padding: 12px; background: var(--gold); color: #222; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 16px; }
+
+    /* --- ТОЧКИ РЕСУРСОВ (НОВАЯ ФИЧА) --- */
+    #resource-field {
+      position: relative;
+      width: 100%;
+      height: 400px; /* Высота поля для сбора */
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0 h10 v10 h-10 z' fill='%23e6d9b8' stroke='%23d4ac6a' stroke-width='0.5'/%3E%3C/svg%3E");
+      border: 4px solid var(--ground);
+      border-radius: 12px;
+      margin-bottom: 40px;
+      overflow: hidden;
+    }
+    .resource-dot {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      animation: float 2s infinite ease-in-out;
+      z-index: 5;
+      transition: transform 0.2s;
+    }
+    .resource-dot:hover { transform: scale(1.1); }
+    .dot-water { background: rgba(52, 152, 219, 0.9); border: 2px solid #3498db; border-radius: 50%; }
+    .dot-leaf { background: rgba(78, 115, 57, 0.9); border: 2px solid #4e7339; border-radius: 50%; }
+    .dot-mush { background: rgba(149, 112, 91, 0.9); border: 2px solid #95705b; border-radius: 50%; }
+    .dot-food { background: rgba(211, 84, 0, 0.9); border: 2px solid #d35400; border-radius: 50%; }
+    
+    @keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <!-- Кнопка возврата в муравейник -->
+  <div class="top-nav">
+    <a href="ant_house.html" class="back-btn">← В муравейник (ant_house)</a>
+  </div>
+
+  <header>
+    <h1>🐜 Двор Муравейника</h1>
+    <div class="ally-badge">Альянс: <span id="ally-name">TWA</span> | Мощь: <span id="player-power">0B</span></div>
+  </header>
+
+  <div class="resources-row">
+    <div class="res-box">
+      <span class="res-icon">💧</span><br>
+      <span class="res-val" id="res-water">0</span> Вода
+    </div>
+    <div class="res-box">
+      <span class="res-icon">🍃</span><br>
+      <span class="res-val" id="res-leaf">0</span> Листья
+    </div>
+    <div class="res-box">
+      <span class="res-icon">🍄</span><br>
+      <span class="res-val" id="res-mush">0</span> Грибы
+    </div>
+    <div class="res-box">
+      <span class="res-icon">🥩</span><br>
+      <span class="res-val" id="res-food">0</span> Пища
+    </div>
+  </div>
+
+  <!-- Поле для случайных ресурсов (точки появляются каждые 5 минут) -->
+  <div id="resource-field">
+    <!-- Сюда JS будет добавлять точки .resource-dot -->
+  </div>
+
+  <div class="yard-grid">
+    <!-- Водохранилище -->
+    <div class="building-card">
+      <div class="card-header">
+        <span class="card-title">💧 Водохранилище</span>
+        <span class="lvl-badge">Lvl <span id="lvl-water">1</span></span>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-water"></div></div>
+      <div class="timer-line" id="timer-water"></div>
+      <div class="cost-line" id="cost-water"></div>
+      <div class="btn-group">
+        <button class="btn-upgrade" id="btn-upgrade-water" onclick="openUpgradeModal('water')">Улучшить</button>
+        <button class="btn-collect" onclick="collectFarm('water')">Собрать</button>
+      </div>
+    </div>
+
+    <!-- Листовая ферма -->
+    <div class="building-card">
+      <div class="card-header">
+        <span class="card-title">🍃 Листовая ферма</span>
+        <span class="lvl-badge">Lvl <span id="lvl-leaf">1</span></span>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-leaf"></div></div>
+      <div class="timer-line" id="timer-leaf"></div>
+      <div class="cost-line" id="cost-leaf"></div>
+      <div class="btn-group">
+        <button class="btn-upgrade" id="btn-upgrade-leaf" onclick="openUpgradeModal('leaf')">Улучшить</button>
+        <button class="btn-collect" onclick="collectFarm('leaf')">Собрать</button>
+      </div>
+    </div>
+
+    <!-- Грибная плантация -->
+    <div class="building-card">
+      <div class="card-header">
+        <span class="card-title">🍄 Грибная плантация</span>
+        <span class="lvl-badge">Lvl <span id="lvl-mush">1</span></span>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-mush"></div></div>
+      <div class="timer-line" id="timer-mush"></div>
+      <div class="cost-line" id="cost-mush"></div>
+      <div class="btn-group">
+        <button class="btn-upgrade" id="btn-upgrade-mush" onclick="openUpgradeModal('mush')">Улучшить</button>
+        <button class="btn-collect" onclick="collectFarm('mush')">Собрать</button>
+      </div>
+    </div>
+
+    <!-- Склад пищи -->
+    <div class="building-card">
+      <div class="card-header">
+        <span class="card-title">🥩 Склад пищи</span>
+        <span class="lvl-badge">Lvl <span id="lvl-food">1</span></span>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-food"></div></div>
+      <div class="timer-line" id="timer-food"></div>
+      <div class="cost-line" id="cost-food"></div>
+      <div class="btn-group">
+        <button class="btn-upgrade" id="btn-upgrade-food" onclick="openUpgradeModal('food')">Улучшить</button>
+        <button class="btn-collect" onclick="collectFarm('food')">Собрать</button>
+      </div>
+    </div>
+
+    <!-- Королева -->
+    <div class="building-card" style="grid-column: span 2;">
+      <div class="card-header">
+        <span class="card-title">👑 Королева</span>
+        <span class="lvl-badge">Lvl <span id="lvl-queen">1</span></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div>Бонус: <span class="stat-value" id="queen-bonus">+0%</span></div>
+        <div>Следующий: <span class="stat-value" id="queen-next-bonus">+1.2%</span></div>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-queen"></div></div>
+      <div class="timer-line" id="timer-queen"></div>
+      <div class="cost-line" id="cost-queen"></div>
+      <button class="btn-upgrade" id="btn-upgrade-queen" onclick="openUpgradeModal('queen')">Улучшить Королеву</button>
+    </div>
+
+    <!-- Казарма -->
+    <div class="building-card" style="grid-column: span 2;">
+      <div class="card-header">
+        <span class="card-title">🛡️ Казарма</span>
+        <span class="lvl-badge">Lvl <span id="lvl-barracks">1</span></span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div>Бонус: <span class="stat-value" id="barracks-bonus">+0%</span></div>
+        <div>Следующий: <span class="stat-value" id="barracks-next-bonus">+1%</span></div>
+      </div>
+      <div class="progress-wrapper"><div class="progress-fill" id="progress-barracks"></div></div>
+      <div class="timer-line" id="timer-barracks"></div>
+      <div class="cost-line" id="cost-barracks"></div>
+      <button class="btn-upgrade" id="btn-upgrade-barracks" onclick="openUpgradeModal('barracks')">Улучшить Казарму</button>
+    </div>
+  </div>
+
+  <!-- Модальное окно апгрейда -->
+  <div id="upgrade-modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal()">&times;</span>
+      <h2 id="modal-title">Улучшение</h2>
+      <p id="modal-desc" style="color:#666;"></p>
+      <div class="stat-row">
+        <span class="stat-label">Текущий уровень:</span>
+        <span class="stat-value" id="stat-current">1</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Следующий уровень:</span>
+        <span class="stat-value" id="stat-next">2</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Эффект (бонус):</span>
+        <span class="stat-value" id="modal-bonus-next">+0%</span>
+      </div>
+      <div class="stat-row" style="text-align:left; font-size:0.9em;">
+        <span id="modal-cost" style="color:red;"></span>
+      </div>
+      <br>
+      <button class="confirm-btn" id="modal-confirm">Подтвердить улучшение</button>
+    </div>
+  </div>
+</body>
+<script>
+  // --- СОСТОЯНИЕ И ЗАГРУЗКА ---
+  let state = (function() {
+    try {
+      const raw = localStorage.getItem('ant_state');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.resources && parsed.buildings) return parsed;
+      return null;
+    } catch (e) {
+      console.error('Ошибка localStorage', e);
+      return null;
+    }
+  })();
+
+  if (!state) {
+    state = {
+      currentAlly: 'TWA',
+      playerPower: 0,
+      resources: { water: 500, leaf: 500, mush: 500, food: 500 },
+      buildings: {
+        water: { lvl: 1, max: 90, production: 10, cd: 3600 },
+        leaf:  { lvl: 1, max: 90, production: 10, cd: 3600 },
+        mush:  { lvl: 1, max: 90, production: 10, cd: 5400 },
+        food:  { lvl: 1, max: 90, production: 10, cd: 7200 },
+        queen: { lvl: 1, max: 46, bonusPerLvl: 1.2 },
+        barracks: { lvl: 1, max: 82, bonusPerLvl: 1 }
+      },
+      lastCollect: {
+        water: Date.now(), leaf: Date.now(),
+        mush: Date.now(), food: Date.now()
+      },
+      resourceDots: [] // активные точки
+    };
+  }
+
+  function saveState() {
+    localStorage.setItem('ant_state', JSON.stringify(state));
+  }
+
+  // --- ОТРИСОВКА РЕСУРСОВ ---
+  function updateResourcesUI() {
+    document.getElementById('res-water').innerText = state.resources.water;
+    document.getElementById('res-leaf').innerText = state.resources.leaf;
+    document.getElementById('res-mush').innerText = state.resources.mush;
+    document.getElementById('res-food').innerText = state.resources.food;
+    document.getElementById('ally-name').innerText = state.currentAlly;
+    document.getElementById('player-power').innerText = Math.floor(state.playerPower / 1e9) + 'B';
+  }
+
+  // --- ФЕРМЫ И СБОР ---
+  function getProduction(type) {
+    const b = state.buildings[type];
+    const now = Date.now();
+    const elapsed = now - state.lastCollect[type];
+    return Math.floor((elapsed / 1000) / b.cd * b.production);
+  }
+
+  function collectFarm(type) {
+    const amount = getProduction(type);
+    if (amount > 0) {
+      state.resources[type] += amount;
+      state.lastCollect[type] = Date.now();
+      saveState();
+      updateResourcesUI();
+      // визуальная индикация (опционально)
+      const el = document.querySelector(`.building-card button[onclick*="${type}"]`);
+      if (el) {
+        const old = el.innerText;
+        el.innerText = 'Собрано!';
+        setTimeout(() => el.innerText = old, 1000);
+      }
+    }
+  }
+
+  // --- АПГРЕЙДЫ И МОДАЛЬНЫЕ ОКНА ---
+  let currentUpgradeType = null;
+
+  function openUpgradeModal(type) {
+    currentUpgradeType = type;
+    const b = state.buildings[type];
+    const nextLvl = b.lvl + 1;
+
+    document.getElementById('modal-title').innerText = `Улучшение: ${getTypeLabel(type)}`;
+    document.getElementById('modal-desc').innerText = '';
+    document.getElementById('stat-current').innerText = b.lvl;
+    document.getElementById('stat-next').innerText = nextLvl;
+
+    // расчёт стоимости (пример: lvl * 500 ресурса)
+    const cost = nextLvl * 500;
+    const costText = `${cost} ${getTypeResource(type)}`;
+    document.getElementById('modal-cost').innerText = costText;
+
+    // бонус следующего уровня
+    let bonus = 0;
+    if (type === 'queen') bonus = nextLvl * state.buildings.queen.bonusPerLvl;
+    else if (type === 'barracks') bonus = nextLvl * state.buildings.barracks.bonusPerLvl;
+    document.getElementById('modal-bonus-next').innerText = bonus > 0 ? '+' + bonus.toFixed(1) + '%' : '+0%';
+
+    document.getElementById('upgrade-modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('upgrade-modal').style.display = 'none';
+  }
+
+  document.getElementById('modal-confirm').onclick = () => {
+    if (!currentUpgradeType) return;
+    const type = currentUpgradeType;
+    const b = state.buildings[type];
+    const nextLvl = b.lvl + 1;
+    const cost = nextLvl * 500; // формула стоимости
+    const resKey = getTypeResource(type);
+
+    if (state.resources[resKey] >= cost) {
+      state.resources[resKey] -= cost;
+      b.lvl = nextLvl;
+      saveState();
+      updateResourcesUI();
+      closeModal();
+      renderBuildingUI(type); // обновить прогресс/таймер
+    } else {
+      alert('Недостаточно ресурсов!');
+    }
+  };
+
+  function getTypeLabel(type) {
+    const map = {
+      water: 'Водохранилище', leaf: 'Листовая ферма',
+      mush: 'Грибная плантация', food: 'Склад пищи',
+      queen: 'Королева', barracks: 'Казарма'
+    };
+    return map[type] || type;
+  }
+
+  function getTypeResource(type) {
+    // для ферм — свой ресурс, для королевы/казармы — вода (или можно сделать универсально)
+    if (type === 'water') return 'water';
+    if (type === 'leaf') return 'leaf';
+    if (type === 'mush') return 'mush';
+    if (type === 'food') return 'food';
+    return 'water'; // по умолчанию вода
+  }
+
+  function renderBuildingUI(type) {
+    const b = state.buildings[type];
+    document.getElementById(`lvl-${type}`).innerText = b.lvl;
+
+    const progressEl = document.getElementById(`progress-${type}`);
+    const timerEl = document.getElementById(`timer-${type}`);
+    const costEl = document.getElementById(`cost-${type}`);
+
+    // прогресс до следующего сбора (для примера)
+    const cd = b.cd;
+    const last = state.lastCollect[type];
+    const now = Date.now();
+    const elapsed = (now - last) % cd;
+    const percent = (elapsed / cd) * 100;
+    progressEl.style.width = percent + '%';
+
+    const remaining = cd - elapsed;
+    const mm = Math.floor(remaining / 1000 / 60);
+    const ss = Math.floor((remaining / 1000) % 60);
+    timerEl.innerText = mm > 0 ? `${mm}м ${ss}с` : `${ss}с`;
+
+    const nextCost = (b.lvl + 1) * 500;
+    costEl.innerText = `Стоимость: ${nextCost} ${getTypeResource(type)}`;
+  }
+
+  function initBuildingsUI() {
+    ['water', 'leaf', 'mush', 'food', 'queen', 'barracks'].forEach(t => renderBuildingUI(t));
+  }
+
+  // --- СЛУЧАЙНЫЕ ТОЧКИ РЕСУРСОВ (каждые 5 минут) ---
+  function spawnRandomResourceDot() {
+    const field = document.getElementById('resource-field');
+    if (!field) return;
+
+    const types = ['water', 'leaf', 'mush', 'food'];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    const dot = document.createElement('div');
+    dot.className = `resource-dot dot-${type}`;
+
+    // случайная позиция
+    const maxX = field.clientWidth - 32;
+    const maxY = field.clientHeight - 32;
+    dot.style.left = Math.floor(Math.random() * maxX) + 'px';
+    dot.style.top = Math.floor(Math.random() * maxY) + 'px';
+
+    dot.onclick = () => {
+      // сбор точки
+      const amounts = { water: 20, leaf: 20, mush: 20, food: 20 };
+      state.resources[type] += amounts[type];
+      saveState();
+      updateResourcesUI();
+
+      dot.style.opacity = '0';
+      setTimeout(() => dot.remove(), 300);
+    };
+
+    field.appendChild(dot);
+    state.resourceDots.push(dot);
+  }
+
+  // запуск спавна каждые 5 минут (300 000 мс)
+  setInterval(spawnRandomResourceDot, 300000);
+  spawnRandomResourceDot(); // первый спавн сразу
+
+  // очистка точек при перезагрузке (чтобы не накапливались)
+  window.addEventListener('beforeunload', () => {
+    state.resourceDots = [];
+  });
+
+  // --- ИНИЦИАЛИЗАЦИЯ ---
+  updateResourcesUI();
+  initBuildingsUI();
+</script>
+</html>

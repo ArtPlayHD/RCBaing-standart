@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Магазин Любви — RCBaing</title>
+  <style>
+    :root {
+      --bg-dark: #0f1115;
+      --panel-bg: rgba(12, 14, 18, 0.85);
+      --accent: #3FBF7B;
+      --gold: #fad996;
+      --text-main: #e0e0e0;
+      --text-muted: #888;
+      --danger: #e91e63;
+    }
+
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .shop-zone {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 30px;
+      background: var(--panel-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    h2 { margin-top: 0; color: var(--gold); }
+    p { color: var(--text-muted); }
+
+    /* Шапка магазина */
+    .shop-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .currency-display {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--gold);
+    }
+
+    /* Сетка товаров */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .product-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+
+    .product-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .price {
+      color: var(--danger);
+      font-weight: bold;
+      margin: 14px 0;
+      font-size: 18px;
+    }
+
+    .buy-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .buy-btn:hover:not(:disabled) {
+      background: #33a167;
+      transform: scale(1.02);
+    }
+    .buy-btn:disabled {
+      background: #555;
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      margin-top: 8px;
+      font-size: 0.85em;
+      min-height: 1.2em;
+    }
+    .status-ok { color: #4caf50; }
+    .status-no-love { color: var(--danger); }
+    .status-bought { color: #888; }
+
+    .close-btn {
+      margin-top: 30px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+	.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.shop-item {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shop-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.item-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.shop-item h3 {
+  color: var(--text-main);
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+}
+
+.item-desc {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.item-cost {
+  display: block;
+  color: #ff9f43;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.buy-btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  background: var(--accent);
+  color: #000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.buy-btn:hover {
+  background: calc(var(--accent) - #202020);
+}
+
+.buy-btn.disabled {
+  background: #555;
+  color: #aaa;
+  cursor: not-allowed;
+}
+    :root {
+      --panel-bg: rgba(20, 20, 30, 0.95);
+      --accent: #ff6b81;
+      --text-main: #ffffff;
+      --text-muted: #b0b0c0;
+      --border: rgba(255, 255, 255, 0.1);
+      --convert-color: #4facf9;
+    }
+
+    body {
+      background: #0f1115;
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* --- Индикатор любви --- */
+    .love-indicator-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      max-width: 400px;
+    }
+    .love-heart-icon {
+      font-size: 24px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(255, 0, 0, 0.3));
+      animation: pulse-heart 2s ease-in-out infinite;
+    }
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .love-bar-wrapper {
+      flex-grow: 1;
+      position: relative;
+      height: 20px;
+      max-width: 220px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #love-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4757, #ff6b81);
+      border-radius: 8px;
+      transition: width 0.4s cubic-bezier(0.35, 1.1, 0.65, 1);
+      box-shadow: 0 0 8px rgba(255, 71, 87, 0.4);
+      position: relative;
+    }
+    #love-bar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .love-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff; font-weight: 700; font-size: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap; z-index: 2; user-select: none;
+    }
+
+    /* --- Комфорт (новый индикатор) --- */
+    .comfort-indicator-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(79, 172, 249, 0.08);
+      border-radius: 16px;
+      border: 1px solid rgba(79, 172, 249, 0.2);
+      margin-bottom: 24px;
+      max-width: 400px;
+    }
+    .comfort-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .comfort-bar-wrapper {
+      flex-grow: 1;
+      position: relative;
+      height: 20px;
+      max-width: 220px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #comfort-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #4facf9);
+      border-radius: 8px;
+      transition: width 0.4s cubic-bezier(0.35, 1.1, 0.65, 1);
+      box-shadow: 0 0 8px rgba(79, 172, 249, 0.4);
+      position: relative;
+    }
+    #comfort-bar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .comfort-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff; font-weight: 700; font-size: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap; z-index: 2; user-select: none;
+    }
+
+    /* --- Кнопка обмена --- */
+    .convert-btn-wrapper {
+      text-align: center; margin-bottom: 24px;
+    }
+    .convert-btn {
+      padding: 10px 20px;
+      border: none;
+      background: var(--convert-color);
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .convert-btn:hover:not(:disabled) {
+      background: #3b82f6;
+      transform: scale(1.02);
+    }
+    .convert-btn:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* --- Магазин --- */
+    .shop-container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .shop-item {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s
+	      .item-icon { font-size: 42px; line-height: 1; margin-bottom: 10px; }
+    .shop-item h3 { color: var(--text-main); margin: 0 0 8px 0; font-size: 1.15rem; }
+    .item-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      min-height: 52px;
+    }
+    .item-cost {
+      display: block;
+      color: #ff9f43;
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 14px;
+    }
+    .buy-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .buy-btn:hover:not(.disabled) {
+      background: #ff5a70;
+      transform: scale(1.02);
+    }
+    .buy-btn.disabled {
+      background: #444;
+      color: #aaa;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .shop-item.purchased h3,
+    .shop-item.purchased .item-desc,
+    .shop-item.purchased .item-cost { opacity: 0.6; }
+    .shop-item.purchased .buy-btn {
+      background: #333;
+      color: #888;
+      cursor: default;
+    }
+
+    /* --- Тост --- */
+    #shopToast {
+      position: fixed;
+      top: 24px; left: 50%;
+      transform: translateX(-50%) translateY(-24px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #shopToast.visible {
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Кнопка открытия магазина (если нужно снаружи) -->
+<div class="floor-access" id="shopAccess">
+  <h3>🛍️ Магазин Любви</h3>
+  <button id="openShopBtn" class="buy-btn">Войти в магазин</button>
+</div>
+
+<!-- Контейнер магазина -->
+<div id="loveShop" class="hidden shop-zone">
+  <h2>🛍️ Магазин Любви</h2>
+  <p>Здесь можно обменять Любовь на полезные усиления и расходники.</p>
+	<div class="shop-container">
+    <!-- Индикатор любви -->
+
+
+  <!-- Тост-уведомление -->
+  <div id="shopToast"></div>
+  <div class="shop-header">
+    <div class="currency-display">
+      ❤️ Твоя Любовь: <span id="loveCountShop">0</span>
+    </div>
+    
+  </div>
+
+  <div class="products-grid">
+    <!-- Товар 1 -->
+    <div class="product-card" data-id="1">
+      <div class="product-icon">🧱</div>
+      <h4>Ускоритель прогресса</h4>
+      <p>Даёт +20% к получаемой Любви во всех зонах.</p>
+      <div class="price">Цена: 100 ❤️</div>
+      <button class="buy-btn" data-cost="100" data-type="boost">Купить</button>
+      <span class="status-msg" id="status1"></span>
+    </div>
+
+    <!-- Товар 2 -->
+    <div class="product-card" data-id="2">
+      <div class="product-icon">📦</div>
+      <h4>Двойной шанс</h4>
+      <p>Удваивает шанс найти редкий предмет в Подвале.</p>
+      <div class="price">Цена: 150 ❤️</div>
+      <button class="buy-btn" data-cost="150" data-type="double_rare">Купить</button>
+      <span class="status-msg" id="status2"></span>
+    </div>
+
+    <!-- Товар 3 -->
+    <div class="product-card" data-id="3">
+      <div class="product-icon">💡</div>
+      <h4>Вечный свет</h4>
+      <p>В Подвале больше не бывает «шуршаний» — только награды или редкость.</p>
+      <div class="price">Цена: 200 ❤️</div>
+      <button class="buy-btn" data-cost="200" data-type="no_noise">Купить</button>
+      <span class="status-msg" id="status3"></span>
+    </div>
+
+    <!-- Товар 4 -->
+    <div class="product-card" data-id="4">
+      <div class="product-icon">🎁</div>
+      <h4>Набор находок</h4>
+      <p>Мгновенно даёт 3 случайных находки для инвентаря.</p>
+      <div class="price">Цена: 80 ❤️</div>
+      <button class="buy-btn" data-cost="80" data-type="random_loot">Купить</button>
+      <span class="status-msg" id="status4"></span>
+    </div>
+
+    <!-- НОВЫЙ ТОВАР: Тихий оберег -->
+    <div class="product-card" data-id="5">
+      <div class="product-icon">🛡️</div>
+      <h4>Тихий оберег</h4>
+      <p>Дарует +1 ❤️ каждую минуту, пока ты в Уютном уголке (пассивно).</p>
+      <div class="price">Цена: 250 ❤️</div>
+      <button class="buy-btn" data-cost="250" data-type="quiet_ward">Купить</button>
+      <span class="status-msg" id="status5"></span>
+    </div>
+  </div>
+  <div class="shop-grid">
+  <!-- Товар 1: Подушка для кота -->
+  <div class="shop-item" data-id="pillow" data-cost="15">
+    <div class="item-icon">🧸</div>
+    <h3>Подушка для кота</h3>
+    <p class="item-desc">+10 к комфорту при каждом поглаживании</p>
+    <span class="item-cost">15 ❤️</span>
+    <button class="buy-btn" type="button">Купить</button>
+  </div>
+
+  <!-- Товар 2: Лампа уюта -->
+  <div class="shop-item" data-id="lamp" data-cost="25">
+    <div class="item-icon">💡</div>
+    <h3>Лампа уюта</h3>
+    <p class="item-desc">Автоматически даёт +1 комфорт каждые 30 сек</p>
+    <span class="item-cost">25 ❤️</span>
+    <button class="buy-btn" type="button">Купить</button>
+  </div>
+
+  <!-- Товар 3: Дневник-блокнот -->
+  <div class="shop-item" data-id="notebook" data-cost="30">
+    <div class="item-icon">📝</div>
+    <h3>Дневник-блокнот</h3>
+    <p class="item-desc">Увеличивает награду за запись в дневнике ×2</p>
+    <span class="item-cost">30 ❤️</span>
+    <button class="buy-btn" type="button">Купить</button>
+  </div>
+
+  <!-- Товар 4: Талисман тишины -->
+  <div class="shop-item" data-id="talisman" data-cost="40">
+    <div class="item-icon">🔮</div>
+    <h3>Талисман тишины</h3>
+    <p class="item-desc">Таймер тишины не сбрасывается при бездействии</p>
+    <span class="item-cost">40 ❤️</span>
+    <button class="buy-btn" type="button">Купить</button>
+  </div>
+</div>
+
+
+  <!-- Кнопка возврата в тихий уголок -->
+  <button id="backToCozyBtn" class="close-btn"onclick="window.location.href='Your.html'">← Вернуться в тихий уголок</button>
+  <button id="backToCozyBtn" class="close-btn"onclick="window.location.href='Shop_in_to.html'">← Обменник</button>
+</div>
+
+<script>
+  
+  // --- Инициализация ---
+  let love = parseInt(localStorage.getItem('rcbaing_love') || '0');
+  const loveDisplay = document.getElementById('loveCountShop');
+
+  function updateLove() {
+    if (loveDisplay) loveDisplay.textContent = love;
+  }
+  updateLove();
+  
+  // --- Открытие/закрытие магазина ---
+  const loveShop = document.getElementById('loveShop');
+  const openShopBtn = document.getElementById('openShopBtn');
+  const leaveShopBtn = document.getElementById('leaveShopBtn');
+
+  if (openShopBtn) {
+    openShopBtn.addEventListener('click', () => {
+      loveShop.classList.remove('hidden');
+      window.scrollTo({ top: loveShop.offsetTop - 20, behavior: 'smooth' });
+    });
+  }
+
+  if (leaveShopBtn) {
+    leaveShopBtn.addEventListener('click', () => {
+      loveShop.classList.add('hidden');
+    });
+  }
+
+  // --- Логика покупок ---
+  document.querySelectorAll('.buy-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const cost = parseInt(e.target.dataset.cost, 10);
+      const type = e.target.dataset.type;
+      const card = e.target.closest('.product-card');
+      const id = card.dataset.id;
+      const statusEl = document.getElementById(`status${id}`);
+
+      if (love < cost) {
+        statusEl.textContent = 'Не хватает Любви!';
+        statusEl.className = 'status-msg status-no-love';
+        return;
+      }
+
+      // Покупка
+      love -= cost;
+      localStorage.setItem('rcbaing_love', love);
+      updateLove();
+
+      statusEl.textContent = 'Куплено! Бонус активен.';
+      statusEl.className = 'status-msg status-ok';
+
+      e.target.disabled = true;
+      e.target.textContent = 'Уже куплено';
+
+      localStorage.setItem(`rcbaing_shop_bought_${type}`, 'true');
+      console.log('Активирован бонус:', type);
+    });
+  });
+
+  // Проверка: какие товары уже куплены
+  function checkBoughtItems() {
+    const types = ['boost', 'double_rare', 'no_noise', 'random_loot', 'quiet_ward'];
+    types.forEach((type, index) => {
+      if (localStorage.getItem(`rcbaing_shop_bought_${type}`)) {
+        const btn = document.querySelector(`.product-card[data-id="${index + 1}"] .buy-btn`);
+        const statusEl = document.getElementById(`status${index + 1}`);
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = 'Уже куплено';
+        }
+        if (statusEl) {
+          statusEl.textContent = 'Уже куплено';
+          statusEl.className = 'status-msg status-bought';
+        }
+      }
+    });
+  }
+  checkBoughtItems();
+  // --- МАГАЗИН: состояние и товары ---
+const shopItems = {
+  pillow: { cost: 15, active: false, effect: 'multiplier_comfort_pet' },
+  lamp: { cost: 25, active: false, effect: 'auto_comfort_interval' },
+  notebook: { cost: 30, active: false, effect: 'diary_multiplier' },
+  talisman: { cost: 40, active: false, effect: 'silence_no_reset' }
+};
+
+// Восстановление купленных товаров при загрузке
+(function() {
+  Object.keys(shopItems).forEach(id => {
+    const saved = localStorage.getItem(`rcbaing_shop_${id}`) === 'true';
+    shopItems[id].active = saved;
+  });
+})();
+
+function saveShopItem(id, isActive) {
+  shopItems[id].active = isActive;
+  localStorage.setItem(`rcbaing_shop_${id}`, isActive ? 'true' : 'false');
+}
+
+// --- ОБРАБОТЧИК ПОКУПОК ---
+document.querySelectorAll('.buy-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const itemEl = btn.closest('.shop-item');
+    const id = itemEl.getAttribute('data-id');
+    const cost = parseInt(itemEl.getAttribute('data-cost'), 10);
+
+    if (shopItems[id].active) {
+      // Уже куплено
+      return;
+    }
+
+    if (love < cost) {
+      showToast('Не хватает ❤️ любви для покупки');
+      return;
+    }
+
+    // Покупка
+    love -= cost;
+    saveShopItem(id, true);
+    saveState();
+    updateLove();
+
+    // Визуальный эффект
+    btn.textContent = 'Куплено';
+    btn.classList.add('disabled');
+    btn.removeEventListener('click', arguments.callee); // защита от повторных кликов
+
+    showToast(`Куплено: ${itemEl.querySelector('h3').textContent}`);
+  });
+});
+
+// Вспомогательная функция (тост без блокировки)
+function showToast(message) {
+  let toast = document.getElementById('shopToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'shopToast';
+    toast.style.cssText = `
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-20px);
+      background: #222; color: #fff; padding: 10px 18px; border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 9999;
+      opacity: 0; transition: transform 0.3s, opacity 0.3s; pointer-events: none;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = 1;
+  toast.style.transform = 'translateX(-50%)';
+  setTimeout(() => {
+    toast.style.opacity = 0;
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+// --- ИНТЕГРАЦИЯ ЭФФЕКТОВ В ТЕКУЩИЕ МЕХАНИКИ ---
+
+// 1. Подушка: +10 к комфорту при поглаживании
+function petCat() {
+  let loveBonus = 1;
+  let comfortBonus = 5;
+
+  if (boosterActive) {
+    loveBonus *= 3;
+    comfortBonus *= 3;
+  }
+
+  // Эффект подушки
+  if (shopItems.pillow.active) {
+    comfortBonus += 10;
+  }
+
+  love += loveBonus;
+  comfort = Math.min(100, comfort + comfortBonus);
+
+  saveState();
+  updateLove();
+  updateComfort();
+  createWarmSpot();
+}
+
+// 2. Лампа: авто-комфорт каждые 30 секунд
+ if (shopItems.lamp.active) {
+  setInterval(() => {
+    if (comfort < 100) {
+      comfort = Math.min(100, comfort + 1);
+      updateComfort();
+      saveState();
+      // Можно добавить визуальный эффект здесь
+    }
+  }, 30 * 1000);
+}
+
+// 3. Блокнот: ×2 награда за запись в дневнике
+ function saveDiaryNote() {
+  const input = document.getElementById('diaryInput');
+  const notesContainer = document.getElementById('diaryNotes');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const noteEl = document.createElement('div');
+  noteEl.className = 'diary-note';
+  noteEl.textContent = text;
+  notesContainer.prepend(noteEl);
+
+  input.value = '';
+
+  let notes = JSON.parse(localStorage.getItem('rcbaing_diary_notes') || '[]');
+  notes.unshift(text);
+  if (notes.length > 20) notes.pop();
+  localStorage.setItem('rcbaing_diary_notes', JSON.stringify(notes));
+
+  // Бонус за дневник
+  let diaryComfort = 5;
+  if (shopItems.notebook.active) {
+    diaryComfort *= 2;
+  }
+
+  comfort = Math.min(100, comfort + diaryComfort);
+  updateComfort();
+  saveState();
+}
+
+// 4. Талисман: таймер тишины не сбрасывается при бездействии
+// В функции resetIdle (из твоего старого кода) добавь проверку:
+/*
+function resetIdle() {
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    // Если талисман куплен — не сбрасываем таймер
+    if (!shopItems.talisman.active) {
+      resetSilenceTimer();
+      // ... остальной код ...
+    }
+  }, IDLE_TIMEOUT);
+}
+*/
+
+  // --- ПАССИВНЫЙ БОНУС: Тихий оберег (+1 ❤️/мин в уголке) ---
+  const isWardActive = localStorage.getItem('rcbaing_shop_bought_quiet_ward') === 'true';
+  const corner = document.getElementById('userCozyCorner');
+  let passiveTimer;
+
+  function startPassiveBonus() {
+    if (!isWardActive || !corner) return;
+
+    passiveTimer = setInterval(() => {
+      const rect = corner.getBoundingClientRect();
+      // Считаем, что пользователь «в уголке», если блок виден хотя бы на 30% по вертикали
+      const isVisible = rect.top < window.innerHeight * 0.7 && rect.bottom > window.innerHeight * 0.3;
+
+      if (isVisible) {
+        love += 1;
+        localStorage.setItem('rcbaing_love', love);
+        updateLove();
+        console.log(`+1 ❤️ (всего: ${love}) — бонус за Уютный уголок`);
+      }
+    }, 60000); // раз в минуту
+  }
+
+  function stopPassiveBonus() {
+    if (passiveTimer) clearInterval(passiveTimer);
+  }
+
+  startPassiveBonus();
+
+  // Перезапуск бонуса при скролле (чтобы не терять интервал, если пользователь ушёл и вернулся)
+  window.addEventListener('scroll', () => {
+    if (!isWardActive || !corner) return;
+    stopPassiveBonus();
+    startPassiveBonus();
+  });
+
+  // --- Кнопка «Вернуться в тихий уголок» ---
+  const backToCozyBtn = document.getElementById('backToCozyBtn');
+  if (backToCozyBtn) {
+    backToCozyBtn.addEventListener('click', () => {
+      if (corner) {
+        corner.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = 'Your_page.html';
+      }
+    });
+  }
+  
+</script>
+<script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba',
+	  'rcbaing': black;
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+
+
+</body>
+</html>
+

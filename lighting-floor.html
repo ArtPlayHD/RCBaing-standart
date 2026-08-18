@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Выбор освещения | RCBaing</title>
+  <style>
+    :root {
+      --bg-base: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+    }
+    body {
+      background: var(--bg-base);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+      transition: background-color 0.4s ease;
+    }
+    .floor-header {
+      margin-bottom: 32px;
+      text-align: center;
+      width: 100%;
+      max-width: 700px;
+    }
+    .floor-title {
+      font-size: 2.4rem;
+      color: var(--accent);
+      margin: 0 0 8px 0;
+      line-height: 1.1;
+    }
+    .floor-subtitle {
+      color: #aaa;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .lighting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 40px;
+    }
+    .light-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .light-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,255,255,0.25);
+    }
+    .light-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 32px rgba(255,107,129,0.25);
+      background: rgba(255,107,129,0.06);
+    }
+    .light-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      box-shadow: 0 0 20px var(--light-color);
+      border: 2px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1d23;
+    }
+    .light-name {
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      color: var(--text);
+    }
+    .light-desc {
+      color: #aaa;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .current-selection {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .selection-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      box-shadow: 0 0 16px var(--current-color);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .selection-info h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.1rem;
+    }
+    .selection-info p {
+      margin: 0;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    .back-btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="floor-header">
+    <h1 class="floor-title">💡 Выбор освещения</h1>
+    <p class="floor-subtitle">Выбери атмосферу для своего «Уютного уголка» — свет задаёт настроение всей зоне</p>
+  </div>
+
+  <div class="current-selection" id="currentSelection">
+    <div class="selection-preview" style="--current-color: #4a4a55;"></div>
+    <div class="selection-info">
+      <h3 id="currentName">Не выбрано</h3>
+      <p id="currentDesc">Выберите один из режимов, чтобы увидеть эффект</p>
+    </div>
+  </div>
+
+  <div class="lighting-grid" id="lightingGrid">
+    <!-- Тёплый вечер -->
+    <div class="light-card" data-mode="warm-evening" data-color="#f5a66b">
+      <div class="light-preview" style="--light-color: #f5a66b;"></div>
+      <h3 class="light-name">Тёплый вечер</h3>
+      <p class="light-desc">Мягкий золотистый свет, как от настольной лампы. Идеально для расслабления и личных заметок.</p>
+    </div>
+
+    <!-- Холодный кабинет -->
+    <div class="light-card" data-mode="cold-study" data-color="#8bc3ff">
+      <div class="light-preview" style="--light-color: #8bc3ff;"></div>
+      <h3 class="light-name">Холодный кабинет</h3>
+      <p class="light-desc">Нейтрально-холодный свет для концентрации. Подойдёт, если ты хочешь «рабочую» атмосферу.</p>
+    </div>
+
+    <!-- Приглушённый уют -->
+    <div class="light-card" data-mode="muted-cozy" data-color="#6c5b7b">
+      <div class="light-preview" style="--light-color: #6c5b7b;"></div>
+      <h3 class="light-name">Приглушённый уют</h3>
+      <p class="light-desc">Спокойный, неяркий свет с фиолетово-серым оттенком. Создаёт ощущение уединённости.</p>
+    </div>
+
+    <!-- Неоновый акцент -->
+    <div class="light-card" data-mode="neon-accent" data-color="#ff4757">
+      <div class="light-preview" style="--light-color: #ff4757;"></div>
+      <h3 class="light-name">Неоновый акцент</h3>
+      <p class="light-desc">Яркий акцентный цвет. Добавляет динамики и стиля, но не для долгого пребывания.</p>
+    </div>
+
+    <!-- Лунный свет -->
+    <div class="light-card" data-mode="moonlight" data-color="#a7c9f5">
+      <div class="light-preview" style="--light-color: #a7c9f5;"></div>
+      <h3 class="light-name">Лунный свет</h3>
+      <p class="light-desc">Светло-голубой, будто от луны. Спокойная, «ночная» атмосфера.</p>
+    </div>
+
+    <!-- Мягкий рассвет -->
+    <div class="light-card" data-mode="soft-dawn" data-color="#ffd7ba">
+      <div class="light-preview" style="--light-color: #ffd7ba;"></div>
+      <h3 class="light-name">Мягкий рассвет</h3>
+      <p class="light-desc">Тёплый персиково-бежевый свет, как в первые минуты после восхода. Очень уютный.</p>
+    </div>
+  </div>
+	 <div class="light-card" data-mode="rcbaing" data-color="#171717">
+      <div class="light-preview" style="--light-color: #171717;"></div>
+      <h3 class="light-name">RCBaing тема</h3>
+      <p class="light-desc">Стандартная тема.Очень совпадает и хорошо ложится на сайт.Подходит для всех видов работ</p>
+    </div>
+  </div>
+  <button class="back-btn" onclick="history.back()">← Назад в меню</button>
+
+  <script>
+    const cards = document.querySelectorAll('.light-card');
+    const currentSelection = document.getElementById('currentSelection');
+    const currentName = document.getElementById('currentName');
+    const currentDesc = document.getElementById('currentDesc');
+    const selectionPreview = document.querySelector('.selection-preview');
+
+    function loadSavedMode() {
+      const saved = localStorage.getItem('rcbaing_lighting_mode');
+      if (!saved) return;
+
+      const card = Array.from(cards).find(c => c.dataset.mode === saved);
+      if (card) applyMode(card);
+    }
+
+    function applyMode(card) {
+      cards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+
+      const color = card.dataset.color;
+      const name = card.querySelector('.light-name').textContent;
+      const desc = card.querySelector('.light-desc').textContent;
+
+      currentName.textContent = name;
+      currentDesc.textContent = desc;
+      selectionPreview.style.setProperty('--current-color', color);
+
+      document.body.style.backgroundColor = color;
+
+      localStorage.setItem('rcbaing_lighting_mode', card.dataset.mode);
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => applyMode(card));
+    });
+
+    loadSavedMode();
+  </script>
+</body>
+</html>

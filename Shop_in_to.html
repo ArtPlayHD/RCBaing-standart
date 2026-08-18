@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RCBaing — Магазин 3.0 + Обмен</title>
+  <style>
+    :root {
+      --panel-bg: rgba(20, 20, 30, 0.95);
+      --accent: #ff6b81;
+      --text-main: #ffffff;
+      --text-muted: #b0b0c0;
+      --border: rgba(255, 255, 255, 0.1);
+      --convert-color: #4facf9;
+    }
+
+    body {
+      background: #0f1115;
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+
+    /* --- Индикатор любви --- */
+    .love-indicator-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      max-width: 400px;
+    }
+    .love-heart-icon {
+      font-size: 24px;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(255, 0, 0, 0.3));
+      animation: pulse-heart 2s ease-in-out infinite;
+    }
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+    .love-bar-wrapper {
+      flex-grow: 1;
+      position: relative;
+      height: 20px;
+      max-width: 220px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #love-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ff4757, #ff6b81);
+      border-radius: 8px;
+      transition: width 0.4s cubic-bezier(0.35, 1.1, 0.65, 1);
+      box-shadow: 0 0 8px rgba(255, 71, 87, 0.4);
+      position: relative;
+    }
+    #love-bar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .love-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff; font-weight: 700; font-size: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap; z-index: 2; user-select: none;
+    }
+
+    /* --- Комфорт (новый индикатор) --- */
+    .comfort-indicator-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(79, 172, 249, 0.08);
+      border-radius: 16px;
+      border: 1px solid rgba(79, 172, 249, 0.2);
+      margin-bottom: 24px;
+      max-width: 400px;
+    }
+    .comfort-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .comfort-bar-wrapper {
+      flex-grow: 1;
+      position: relative;
+      height: 20px;
+      max-width: 220px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    #comfort-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #4facf9);
+      border-radius: 8px;
+      transition: width 0.4s cubic-bezier(0.35, 1.1, 0.65, 1);
+      box-shadow: 0 0 8px rgba(79, 172, 249, 0.4);
+      position: relative;
+    }
+    #comfort-bar::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+      pointer-events: none;
+      z-index: 1;
+    }
+    .comfort-text {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff; font-weight: 700; font-size: 12px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+      white-space: nowrap; z-index: 2; user-select: none;
+    }
+
+    /* --- Кнопка обмена --- */
+    .convert-btn-wrapper {
+      text-align: center; margin-bottom: 24px;
+    }
+    .convert-btn {
+      padding: 10px 20px;
+      border: none;
+      background: var(--convert-color);
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .convert-btn:hover:not(:disabled) {
+      background: #3b82f6;
+      transform: scale(1.02);
+    }
+    .convert-btn:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    /* --- Магазин --- */
+    .shop-container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .shop-item {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s
+	      .item-icon { font-size: 42px; line-height: 1; margin-bottom: 10px; }
+    .shop-item h3 { color: var(--text-main); margin: 0 0 8px 0; font-size: 1.15rem; }
+    .item-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+      margin-bottom: 14px;
+      min-height: 52px;
+    }
+    .item-cost {
+      display: block;
+      color: #ff9f43;
+      font-weight: bold;
+      font-size: 1.05rem;
+      margin-bottom: 14px;
+    }
+    .buy-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      background: var(--accent);
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .buy-btn:hover:not(.disabled) {
+      background: #ff5a70;
+      transform: scale(1.02);
+    }
+    .buy-btn.disabled {
+      background: #444;
+      color: #aaa;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .shop-item.purchased h3,
+    .shop-item.purchased .item-desc,
+    .shop-item.purchased .item-cost { opacity: 0.6; }
+    .shop-item.purchased .buy-btn {
+      background: #333;
+      color: #888;
+      cursor: default;
+    }
+
+    /* --- Тост --- */
+    #shopToast {
+      position: fixed;
+      top: 24px; left: 50%;
+      transform: translateX(-50%) translateY(-24px);
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      z-index: 9999;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #shopToast.visible {
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shop-container">
+    <!-- Индикатор любви -->
+    <div class="love-indicator-container">
+      <div class="love-heart-icon">❤️</div>
+      <div class="love-bar-wrapper">
+        <div id="love-bar" class="love-bar"></div>
+        <span id="love-value" class="love-text">0 ❤️</span>
+      </div>
+    </div>
+
+    <!-- Индикатор комфорта -->
+    <div class="comfort-indicator-container">
+      <div class="comfort-icon">🧸</div>
+      <div class="comfort-bar-wrapper">
+        <div id="comfort-bar" class="comfort-bar"></div>
+        <span id="comfort-value" class="comfort-text">0 🧸</span>
+      </div>
+    </div>
+
+    <!-- Кнопка обмена: уют → любовь -->
+    <div class="convert-btn-wrapper">
+      <button id="convertBtn" class="convert-btn" type="button">
+        Обменять уют на любовь (10 🧸 → 1 ❤️)
+      </button>
+    </div>
+
+    <h2 style="margin-bottom: 24px; color: #fff;">Магазин уюта</h2>
+    <div class="shop-grid" id="shopGrid"></div>
+  </div>
+
+  <!-- Тост-уведомление -->
+  <div id="shopToast"></div>
+
+  <script>
+    // === КОНФИГУРАЦИЯ ===
+    const LOVE_MAX = 9999;
+    const COMFORT_MAX = 9999;
+    const CONVERT_RATIO = 1; // 10 комфорта = 1 любовь
+    const LOVE_SPEED_FACTOR = 0.25;
+
+    const LOCAL_KEY_LOVE = 'rcbaing_love';
+    const LOCAL_KEY_COMFORT = 'rcbaing_comfort';
+    const LOCAL_PREFIX_SHOP = 'rcbaing_shop_';
+
+    // === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===
+    let love = 0;
+    let comfort = 0;
+    let loveDisplayValue = 0;
+    let comfortDisplayValue = 0;
+    let loveAnimationFrameId = null;
+    let comfortAnimationFrameId = null;
+
+    // Конфиг магазина (20 товаров)
+    const shopItems = {
+      pillow:        { cost: 15, active: false, effect: 'pet_comfort_add_10', consumable: false },
+      lamp:          { cost: 25, active: false, effect: 'auto_comfort_30s', consumable: false },
+      notebook:      { cost: 30, active: false, effect: 'diary_multiplier_2x', consumable: false },
+      talisman:      { cost: 40, active: false, effect: 'silence_no_reset', consumable: false },
+      blanket:       { cost: 20, active: false, effect: 'base_comfort_add_5', consumable: false },
+      cocoa:         { cost: 10, active: false, effect: 'instant_comfort_15', consumable: true },
+      candle:        { cost: 18, active: false, effect: 'rare_chance_boost_2pct', consumable: false },
+      photoAlbum:    { cost: 35, active: false, effect: 'diary_memory_effect', consumable: false },
+      player:        { cost: 50, active: false, effect: 'bg_music_pulse', consumable: false },
+      stickers:      { cost: 12, active: false, effect: 'ui_cute_stickers', consumable: false },
+      miniGarden:    { cost: 45, active: false, effect: 'passive_love_1_per_60s', consumable: false },
+      thermoMug:     { cost: 22, active: false, effect: 'cocoa_boost_duration_1_5x', consumable: false },
+      whiteNoise:    { cost: 38, active: false, effect: 'idle_reset_reduce_30pct', consumable: false },
+      shelf:         { cost: 28, active: false, effect: 'decor_slot_plus_1', consumable: false },
+      brushes:       { cost: 42, active: false, effect: 'palette_pastel_unlock', consumable: false },
+      rainWindow:    { cost: 55, active: false, effect: 'rain_bg_plus_comfort_45s', consumable: false },
+      adjustableLamp:{ cost: 33, active: false, effect: 'brightness_control_unlock', consumable: false },
+      teaBox:        { cost: 16, active: false, effect: 'instant_comfort_10_love_2', consumable: true },
+      doorMat:       { cost: 14, active: false, effect: 'base_comfort_add_3', consumable: false },
+      cozyBook:      { cost: 60, active: false, effect: 'all_rewards_boost_10pct', consumable: false }
+    };
+
+    // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ОТРИСОВКИ ===
+    function getIconForItem(id) {
+      const icons = {
+        pillow: '🛋️', lamp: '💡', notebook: '📒', talisman: '🧿', blanket: '🧣',
+        cocoa: '☕', candle: '🕯️', photoAlbum: '🎞️', player: '🎵', stickers: '🏷️',
+        miniGarden: '🌿', thermoMug: '🥤', whiteNoise: '🔇', shelf: '🗄️', brushes: '🎨',
+        rainWindow: '🌧️', adjustableLamp: '🔦', teaBox: '📦', doorMat: '🚪', cozyBook: '📖'
+      };
+      return icons[id] || '🛍️';
+    }
+
+    function getItemName(id) {
+      const names = {
+        pillow: 'Подушка', lamp: 'Лампа', notebook: 'Блокнот', talisman: 'Талисман тишины',
+        blanket: 'Плед', cocoa: 'Чашка какао', candle: 'Свеча', photoAlbum: 'Фотоальбом',
+        player: 'Плеер', stickers: 'Наклейки', miniGarden: 'Мини‑сад', thermoMug: 'Термокружка',
+        whiteNoise: 'Белый шум', shelf: 'Полка', brushes: 'Кисти', rainWindow: 'Окно с дождём',
+        adjustableLamp: 'Регулируемая лампа', teaBox: 'Коробка чая', doorMat: 'Коврик у двери',
+        cozyBook: 'Уютная книга'
+      };
+      return names[id] || id;
+    }
+
+    function getItemDesc(id) {
+      const descs = {
+        pillow: '+10 комфорта при поглаживании',
+        lamp: '+1 комфорт каждые 30 секунд',
+        notebook: '×2 к комфорту от записей в дневнике',
+        talisman: 'Отменяет сброс комфорта при бездействии',
+        blanket: '+5 комфорта при поглаживании',
+        cocoa: 'Мгновенно +15 комфорта (расходник)',
+        candle: '+2% к шансу редкого бонуса',
+        photoAlbum: 'Эффект воспоминаний (визуал)',
+        player: 'Фоновая музыка с пульсацией шкалы',
+        stickers: 'Украшения интерфейса',
+        miniGarden: '+1 любовь каждые 60 секунд',
+        thermoMug: 'Длительность бонуса от какао ×1.5',
+        whiteNoise: '-30% шанс сброса комфорта при бездействии',
+        shelf: '+1 слот для декора',
+        brushes: 'Разблокирует пастельную палитру',
+        rainWindow: '+1 комфорт каждые 45 секунд',
+        adjustableLamp: 'Разблокирует регулировку яркости интерфейса',
+        teaBox: 'Мгновенно +10 комфорта и +2 любви (расходник)',
+        doorMat: '+3 комфорта при поглаживании',
+        cozyBook: '+10% ко всем получаемым наградам'
+      };
+      return descs[id] || 'Приятный предмет для уюта';
+    }
+
+    // === СОХРАНЕНИЕ И ЗАГРУЗКА ===
+    function saveState() {
+      localStorage.setItem(LOCAL_KEY_LOVE, love.toString());
+      localStorage.setItem(LOCAL_KEY_COMFORT, comfort.toString());
+    }
+
+    (function initState() {
+      // Загрузка любви
+      const savedLove = localStorage.getItem(LOCAL_KEY_LOVE);
+      if (savedLove !== null) {
+        love = Math.max(0, Math.min(LOVE_MAX, parseInt(savedLove, 10)));
+      }
+      updateLove(love);
+
+      // Загрузка комфорта
+      const savedComfort = localStorage.getItem(LOCAL_KEY_COMFORT);
+      if (savedComfort !== null) {
+        comfort = Math.max(0, Math.min(COMFORT_MAX, parseInt(savedComfort, 10)));
+      }
+      updateComfort(comfort);
+
+      // Загрузка состояния покупок
+      Object.keys(shopItems).forEach(id => {
+        const saved = localStorage.getItem(`${LOCAL_PREFIX_SHOP}${id}`);
+        shopItems[id].active = saved === 'true';
+      });
+    })();
+
+    // === ИНДИКАТОРЫ: АНИМАЦИЯ ===
+    function updateLove(newValue) {
+      if (typeof newValue !== 'undefined') {
+        love = newValue;
+        love = Math.max(0, Math.min(LOVE_MAX, love));
+        localStorage.setItem(LOCAL_KEY_LOVE, love.toString());
+      }
+
+      const loveBar = document.getElementById('love-bar');
+      const loveText = document.getElementById('love-value');
+      if (!loveBar || !loveText) return;
+
+      loveText.textContent = `${love} $`;
+      cancelAnimationFrame(loveAnimationFrameId);
+      animateLoveBar();
+    }
+
+    function animateLoveBar() {
+      const loveBar = document.getElementById('love-bar');
+      if (!loveBar) return;
+      const targetPercent = Math.min(100, (love / LOVE_MAX) * 100);
+      if (Math.abs(loveDisplayValue - targetPercent) < 0.1) {
+        loveDisplayValue = targetPercent;
+        loveBar.style.width = `${loveDisplayValue}%`;
+        return;
+      }
+
+      const delta = (targetPercent - loveDisplayValue) * LOVE_SPEED_FACTOR;
+      loveDisplayValue += delta;
+      if ((loveDisplayValue > targetPercent && delta > 0) ||
+          (loveDisplayValue < targetPercent && delta < 0)) {
+        loveDisplayValue = targetPercent;
+      }
+      loveBar.style.width = `${loveDisplayValue}%`;
+      loveAnimationFrameId = requestAnimationFrame(animateLoveBar);
+    }
+
+    function updateComfort(newValue) {
+      if (typeof newValue !== 'undefined') {
+        comfort = newValue;
+        comfort = Math.max(0, Math.min(COMFORT_MAX, comfort));
+        localStorage.setItem(LOCAL_KEY_COMFORT, comfort.toString());
+      }
+
+      const comfortBar = document.getElementById('comfort-bar');
+      const comfortText = document.getElementById('comfort-value');
+      if (!comfortBar || !comfortText) return;
+
+      comfortText.textContent = `${comfort} 🧸`;
+      cancelAnimationFrame(comfortAnimationFrameId);
+      animateComfortBar();
+    }
+
+    function animateComfortBar() {
+      const comfortBar = document.getElementById('comfort-bar');
+      if (!comfortBar) return;
+
+      const targetPercent = Math.min(100, (comfort / COMFORT_MAX) * 100);
+      if (Math.abs(comfortDisplayValue - targetPercent) < 0.1) {
+        comfortDisplayValue = targetPercent;
+        comfortBar.style.width = `${comfortDisplayValue}%`;
+        return;
+      }
+
+      const delta = (targetPercent - comfortDisplayValue) * LOVE_SPEED_FACTOR;
+      comfortDisplayValue += delta;
+      if ((comfortDisplayValue > targetPercent && delta > 0) ||
+          (comfortDisplayValue < targetPercent && delta < 0)) {
+        comfortDisplayValue = targetPercent;
+      }
+      comfortBar.style.width = `${comfortDisplayValue}%`;
+      comfortAnimationFrameId = requestAnimationFrame(animateComfortBar);
+    }
+
+    // === МЕХАНИКА ОБМЕНА (уют → любовь) ===
+    document.getElementById('convertBtn').addEventListener('click', () => {
+      if (comfort < CONVERT_RATIO) {
+        showToast(`Не хватает уюта: нужно ${CONVERT_RATIO} 🧸`);
+        return;
+      }
+
+      comfort -= CONVERT_RATIO;
+      love = Math.min(LOVE_MAX, love + 1);
+
+      updateComfort(comfort);
+      updateLove(love);
+      saveState();
+
+      showToast(`Обменено: ${CONVERT_RATIO} 🧸 → 1 $`);
+    });
+
+    // Обновляем кнопку (блокируем, если не хватает уюта)
+    setInterval(() => {
+      const btn = document.getElementById('convertBtn');
+      if (!btn) return;
+      btn.disabled = comfort < CONVERT_RATIO;
+      btn.textContent = comfort >= CONVERT_RATIO
+        ? `Обменять уют на любовь (${CONVERT_RATIO} 🧸 → 1 $)`
+        : `Не хватает уюта (нужно ${CONVERT_RATIO})`;
+    }, 500);
+
+    // === ОТРИСОВКА МАГАЗИНА ===
+    function renderShop() {
+      const grid = document.getElementById('shopGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      Object.entries(shopItems).forEach(([id, item]) => {
+        const card = document.createElement('div');
+        card.className = `shop-item ${item.active ? 'purchased' : ''}`;
+                card.setAttribute('data-id', id);
+        card.setAttribute('data-cost', item.cost);
+
+        const statusText = item.active
+          ? (item.consumable ? 'Использовать' : 'Куплено')
+          : `${item.cost} $`;
+
+        const btnClass = item.active && !item.consumable ? 'disabled' : '';
+
+        card.innerHTML = `
+          <div class="item-icon">${getIconForItem(id)}</div>
+          <h3>${getItemName(id)}</h3>
+          <p class="item-desc">${getItemDesc(id)}</p>
+          <span class="item-cost">${statusText}</span>
+          <button class="buy-btn ${btnClass}" type="button">
+            ${statusText}
+          </button>
+        `;
+
+        grid.appendChild(card);
+      });
+
+      // Вешаем обработчики заново (на случай перерисовки)
+      document.querySelectorAll('.buy-btn').forEach(btn => {
+        btn.removeEventListener('click', handleBuyBound);
+        btn.addEventListener('click', handleBuyBound);
+      });
+    }
+
+    const handleBuyBound = (e) => handleBuy(e.target);
+
+    function handleBuy(btn) {
+      const itemEl = btn.closest('.shop-item');
+      const id = itemEl.getAttribute('data-id');
+      const cost = parseInt(itemEl.getAttribute('data-cost'), 10);
+
+      if (!shopItems[id]) return;
+
+      // Если уже куплено — обрабатываем расходники
+      if (shopItems[id].active) {
+        if (id === 'cocoa') useCocoa();
+        if (id === 'teaBox') useTeaBox();
+        return;
+      }
+
+      // Обычная покупка
+      if (love < cost) {
+        showToast('Не хватает $ любви для покупки');
+        return;
+      }
+
+      love -= cost;
+      shopItems[id].active = true;
+      localStorage.setItem(`${LOCAL_PREFIX_SHOP}${id}`, 'true');
+
+      updateLove(love);
+      renderShop();
+      showToast(`Куплено: ${getItemName(id)}`);
+    }
+
+    // === РАСХОДНИКИ ===
+    function useCocoa() {
+      let bonus = 15;
+      if (shopItems.thermoMug.active) bonus = Math.round(bonus * 1.5);
+
+      comfort = Math.min(COMFORT_MAX, comfort + bonus);
+      saveState();
+      showToast(`☕ Чашка какао: +${bonus} комфорта`);
+    }
+
+    function useTeaBox() {
+      comfort = Math.min(COMFORT_MAX, comfort + 10);
+      love = Math.min(LOVE_MAX, love + 2);
+      updateLove(love);
+      saveState();
+      showToast('🍵 Коробка с чаем: +10 комфорта и +2 любви');
+    }
+
+    // === ПАССИВНЫЕ ЭФФЕКТЫ: ЕДИНЫЙ ЦИКЛ ===
+    let shopTickInterval;
+    function startShopPassiveLoop() {
+      if (shopTickInterval) clearInterval(shopTickInterval);
+
+      shopTickInterval = setInterval(() => {
+        const now = Date.now();
+
+        // Лампа: +1 комфорт каждые 30 сек
+        if (shopItems.lamp.active) {
+          if (now - (window.lastLampTick || 0) >= 30 * 1000) {
+            if (comfort < COMFORT_MAX) {
+              comfort = Math.min(COMFORT_MAX, comfort + 1);
+              saveState();
+            }
+            window.lastLampTick = now;
+          }
+        }
+
+        // Мини‑сад: +1 любовь каждые 60 сек
+        if (shopItems.miniGarden.active) {
+          if (now - (window.lastGardenTick || 0) >= 60 * 1000) {
+            love = Math.min(LOVE_MAX, love + 1);
+            updateLove(love);
+            window.lastGardenTick = now;
+          }
+        }
+
+        // Окно с дождём: +1 комфорт каждые 45 сек
+        if (shopItems.rainWindow.active) {
+          if (now - (window.lastRainTick || 0) >= 45 * 1000) {
+            if (comfort < COMFORT_MAX) {
+              comfort = Math.min(COMFORT_MAX, comfort + 1);
+              saveState();
+            }
+            window.lastRainTick = now;
+          }
+        }
+      }, 1000); // проверяем каждую секунду
+    }
+
+    // === МЕХАНИКА БЕЗДЕЙСТВИЯ (idle reset) ===
+    let idleTimer;
+    const IDLE_TIMEOUT = 60 * 1000; // 60 секунд бездействия
+
+    function resetIdle() {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        // Талисман тишины: вообще не сбрасываем
+        if (shopItems.talisman.active) {
+          return;
+        }
+
+        // Белый шум: шанс избежать сброса 30%
+                const avoidReset = shopItems.whiteNoise.active && Math.random() < 0.3;
+        if (avoidReset) {
+          // Продлеваем таймер ещё на 30 секунд
+          idleTimer = setTimeout(resetIdle, 30 * 1000);
+          return;
+        }
+
+        // Обычный сброс
+        comfort = 0;
+        saveState();
+      }, IDLE_TIMEOUT);
+    }
+
+    // Сбрасываем таймер при любом действии игрока
+    ['click', 'keydown', 'mousemove'].forEach(event => {
+      window.addEventListener(event, () => resetIdle(), { once: false, passive: true });
+    });
+
+    // Инициализация таймера при старте
+    resetIdle();
+
+    // === ТОСТЫ (уведомления) ===
+    function showToast(message) {
+      let toast = document.getElementById('shopToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'shopToast';
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message;
+      toast.className = '';
+      void toast.offsetWidth; // принудительный reflow для сброса анимации
+      toast.classList.add('visible');
+
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // === ИНТЕГРАЦИЯ С МЕХАНИКОЙ «ПОГЛАЖИВАНИЯ» (petCat) ===
+    function petCat() {
+      let loveBonus = 1;
+      let comfortBonus = 5;
+
+      // Базовые бонусы от купленных предметов
+      if (shopItems.pillow.active) comfortBonus += 10;
+      if (shopItems.blanket.active) comfortBonus += 5;
+      if (shopItems.doorMat.active) comfortBonus += 3;
+
+      // Множитель от книги
+      if (shopItems.cozyBook.active) {
+        loveBonus *= 1.1;
+        comfortBonus *= 1.1;
+      }
+
+      love = Math.min(LOVE_MAX, love + loveBonus);
+      comfort = Math.min(COMFORT_MAX, comfort + comfortBonus);
+
+      updateLove(love);
+      updateComfort(comfort);
+      saveState();
+
+      showToast(`🐾 Погладили питомца: +${Math.round(loveBonus)} ❤️ и +${Math.round(comfortBonus)} комфорта`);
+    }
+
+    // Можно повесить на кнопку в UI, например:
+    // <button onclick="petCat()">Погладить</button>
+
+    // === ЗАПУСК ПРИ ЗАГРУЗКЕ СТРАНИЦЫ ===
+    (function init() {
+      initState();
+      renderShop();
+      startShopPassiveLoop();
+      resetIdle();
+    })();
+  </script>
+</body>
+</html>
+
+
+

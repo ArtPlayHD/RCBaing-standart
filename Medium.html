@@ -1,0 +1,47 @@
+<!DOCTYPE>
+<html>
+<link rel="stylesheet" type="text/css"href="style.css">
+<button id="SAdventure"onclick="SEASY()">Создать мир</button>
+<img src="EASY_TERRAIN.jpg"/>
+<script>
+var gamer=prompt("Выбери персонажа или имя")
+var monster=prompt("Выбери любимого монстра")
+         
+function SEASY(){ 
+        var build=prompt(gamer+" попал в новый мир.Построй кровать,дом или ничего.")
+        if(build=='кровать'){
+            window.alert(gamer+" строит кровать и ложится спать.Ночью его бьёт"+monster);
+            window.alert(gamer+" не смог защититься и респавнился в другом месте!Попробуй ещё раз!");}
+        if(build=='ничего'){
+            window.alert(gamer+" начинает игру и его бьёт "+monster);
+            window.alert(gamer+" не смог защититься и респавнился в другом месте!Попробуй ещё раз!");}
+        if(build=='дом'){
+            var buildWOD=prompt(gamer+" строит дом.Теперь "+monster+" ему не страшен.Появляется волк!"+gamer+"Приручает или бежит?")
+            if(buildWOD=='бежит'){window.alert(gamer+"бежит от волка и случайно ударил его.Волк заагрился и начал бить его!Начни сначала!");}
+            if(buildWOD=='приручает'){
+                    window.alert(gamer+" приручает волка,и он защищает его от "+monster);}
+                    var build2=prompt(gamer+" нашёл деревню.Он видит богатого жителя с изумрудами."+gamer+" отбирает у жителя изумруды или торгует с ним?")
+                    if(build2=='отнимает'){window.alert(gamer+" начал отнимать изумруды,но это заметил големы.Они начали бить "+gamer+".Он не смог убежать и они его уничтожили!Попробуй ещё раз!")}
+                    if(build2=='торгует'){
+                        window.alert(gamer+" наторговал 128 изумрудов,и купил 10 обсидиана.")
+                        var build3=prompt(gamer+" строит портал или остатся в деревне добыть золотую и алмазную броню?")
+                        if(build3=='строит портал'){
+                            window.alert(gamer+"зашёл в портал,и начал сражаться с ифритами,но задел пиглина.Они начали бить его."+gamer+" не смог защититься и респавнился в другом месте!Начни сначала!");}
+                        
+                        if(build3=='остаётся в деревне'){
+                            window.alert(gamer+" добывает броню и мечи.");      
+                            window.alert(gamer+"прошёл игру minecraft,добыл элитры и стал непобедимым!");       
+                            window.location.href='GAME3VICTORY.html';}
+                        if(build3=='овд'){
+                            window.alert(gamer+" добывает броню и мечи.");      
+                            window.alert(gamer+"прошёл игру minecraft,добыл элитры и стал непобедимым!");       
+                            window.location.href='GAME3VICTORY.html';}
+                    }
+                   
+                        
+                        
+}   
+        }
+
+</script>
+</html>

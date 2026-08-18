@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>RCBaing-Standart</title>
+
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --muted: #a0a0b0;
+      --glass: rgba(255, 255, 255, 0.08);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 720px;
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 32px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    }
+
+    h1, h4 {
+      text-align: center;
+      color: var(--text);
+    }
+
+    .author-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .author-block:hover {
+      opacity: 0.8;
+    }
+    .author-block img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+    .author-block p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    img[alt="Обложка RCBaing"] {
+      width: 100%;
+      max-width: 600px;
+      border-radius: 12px;
+      margin: 24px 0;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .main-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--glass);
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+
+    /* Поиск */
+    .search-section {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .search-input {
+      padding: 10px 16px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      width: 280px;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-highlight {
+      background: var(--accent);
+      color: #000;
+      padding: 0 4px;
+      border-radius: 4px;
+    }
+
+    /* Модальное окно для админа */
+    #adminModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      width: 300px;
+    }
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: white;
+      margin: 12px 0;
+    }
+    .modal-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-close {
+      color: var(--muted);
+      cursor: pointer;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Музыка -->
+  <audio id="MFI" src="music1.mp3" autoplay loop></audio>
+
+  <div class="container">
+    <!-- Аватар и автор -->
+    <div class="author-block" onclick="goToAdmin()">
+      <img src="ArtPlayHD.png" alt="Автор" />
+      <p>Автор: ArtPlayHD</p>
+    </div>
+
+    <h1>RCBaing — Главная</h1>
+    <img src="RCBaing-standart.jpg" alt="Обложка RCBaing" />
+
+    <h4>Достижения</h4>
+    <button class="icon-button" onclick="window.location.href='Rang.html'">Перейти к достижениям</button>
+
+    <!-- Кнопки в сетке -->
+    <div class="main-buttons-grid">
+      <button onclick="window.location.href='Mail.html'">Почта</button>
+      <button onclick="window.location.href='setup.html'">Скачать Minecraft</button>
+      <button onclick="location.href='game.html'">Игра «Крипер на ферме»</button>
+      <button onclick="window.location.href='Info.html'">Поиск 2.0</button>
+      <button onclick="window.location.href='Music_setup.html'">Слушать музыку</button>
+      <button onclick="window.location.href='game3.html'">Minecraft-RCBaing edition</button>
+      <button onclick="window.location.href='BDF.html'">Книги издательства «Рукопись не горит!»</button>
+      <button onclick="window.location.href='tactics-floor.html'">Тактика Ant Legion</button>
+	  <button onclick="window.location.href='reg.html'">Войти / Зарегистрироваться</button>
+	  <button onclick="window.location.href='ant_house.html'">Ant Legion</button>
+	  <button onclick="window.location.href='flower-alley.html'">Аллея цветов</button>
+	  <button onclick="window.location.href='space-floor.html'">Космическая-станция</button>
+	  
+    </div>
+	<a href="lighting-floor.html" class="light-btn-neon">
+  <span class="btn-text">Настроить свет</span>
+  <span class="btn-arrow">→</span>
+</a>
+
+<style>
+  :root {
+    --bg-base: #0f1115;
+    --accent-start: #ff4757;
+    --accent-end: #ff6b81;
+    --text: #ffffff;
+  }
+
+  .light-btn-neon {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 30px;
+    background: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .light-btn-neon::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.15) 0px,
+      rgba(255,255,255,0.15) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .light-btn-neon:hover {
+    transform: scale(1.03);
+    filter: brightness(1.1);
+  }
+
+  .light-btn-neon:hover::before {
+    opacity: 1;
+  }
+
+  .btn-arrow {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+</style>
+
+
+    <!-- Поиск -->
+    <div class="search-section">
+      <input type="text" id="simpleSearch" class="search-input" placeholder="Быстрый поиск (minecraft, почта, книги…)" />
+      <br><br>
+      <button id="simpleSearchBtn">Найти</button>
+      
+      <br><br>
+      <input type="text" id="rcbaingSearch" class="search-input" placeholder="Поиск по тексту на странице" />
+      <br><br>
+      <button id="searchBtn">Выделить совпадения</button>
+    </div>
+
+    <!-- Модальное окно для админа -->
+    <div id="adminModal">
+      <div class="modal-content">
+        <h3>Вход в админ-панель</h3>
+        <input type="password" id="adminPassword" class="modal-input" placeholder="Введите пароль" />
+        <button class="modal-btn" onclick="checkAdminPassword()">Войти</button>
+        <div class="modal-close" onclick="closeAdminModal()">Отмена</div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+
+  // Проверка блокировки страницы
+  if (localStorage.getItem('open/close') === '0') {
+    alert('Страница закрыта.');
+    window.location.href = 'Page_close.html';
+  }
+
+  const ADMIN_PASSWORD = '2679'; // <-- поменяй на свой пароль
+
+  const searchMap = {
+    'minecraft': 'setup.html',
+    'скачать': 'setup.html',
+    'почта': 'Mail.html',
+    'книги': 'BDF.html',
+    'игра': 'game.html',
+    'крипер': 'game.html',
+    'достижения': 'Rang.html',
+    'профиль': 'Your_page.html',
+    'регистрация': 'reg.html',
+    'админ': 'Admin.html',
+	'майнкрафт': 'setup.html',
+    'скачать': 'setup.html',
+    'поиск': 'Info.html',
+    'поисковик': 'Info.html',
+    'игра': 'game.html',
+    'крипер': 'game.html',
+    'достижения': 'Rang.html',
+    'профиль': 'Your_page.html',
+    'регистрация': 'reg.html',
+    'тактика': 'tactics-floor.html'
+  };
+
+  document.getElementById('simpleSearchBtn').addEventListener('click', () => {
+    const q = document.getElementById('simpleSearch').value.trim().toLowerCase();
+    const target = Object.keys(searchMap).find(k => q.includes(k));
+    if (target) {
+      window.location.href = searchMap[target];
+    } else {
+      alert('Ничего не найдено. Попробуй: Minecraft, почта, книги, достижения.');
+    }
+  });
+
+  document.getElementById('searchBtn').addEventListener('click', () => {
+    const query = document.getElementById('rcbaingSearch').value.trim().toLowerCase();
+    if (!query) return;
+
+    const allTextNodes = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, .ach-card h3, .ach-card p');
+    allTextNodes.forEach(el => {
+      const originalText = el.dataset.originalText || el.textContent;
+      if (!el.dataset.originalText) {
+        el.dataset.originalText = originalText;
+      }
+
+      const highlighted = originalText.replace(
+        new RegExp(`(${query})`, 'gi'),
+        '<span class="search-highlight">$1</span>'
+      );
+      el.innerHTML = highlighted;
+    });
+
+    const firstHighlight = document.querySelector('.search-highlight');
+    if (firstHighlight) {
+      firstHighlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  function goToAdmin() {
+    document.getElementById('adminModal').style.display = 'flex';
+  }
+
+  function closeAdminModal() {
+    document.getElementById('adminModal').style.display = 'none';
+  }
+
+  function checkAdminPassword() {
+    const passwordInput = document.getElementById('adminPassword');
+    const password = passwordInput.value;
+
+    if (password === ADMIN_PASSWORD) {
+      closeAdminModal();
+      window.location.href = 'Admin.html';
+    } else {
+      alert('Неверный пароль.');
+      passwordInput.value = '';
+    }
+  }
+</script>
+<script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba',
+	  'rcbaing': '#171717'
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+

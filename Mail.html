@@ -1,0 +1,55 @@
+<button id="helping_robot"onclick="Write1()">Открыть напоминание "A"</button>
+<button id="helping_robot"onclick="WRMA1()">Создать новое напоминание "A"</button>
+<button id="helping_robot"onclick="Write2()">Открыть напоминание "B"</button>
+<button id="helping_robot"onclick="WRMA2()">Создать новое напоминание "B"</button>
+<button id="helping_robot"onclick="Write4()">Открыть напоминание "С"</button>
+<button id="helping_robot"onclick="WRMA4()">Создать новое напоминание "С"</button>
+<button id="helping_robot"onclick="Messange()">Открыть сообщение</button>
+
+<link rel="stylesheet" type="text/css"href="style.css">
+<script>
+var postman_Pechkin = 0;
+
+localStorage.setItem('postman_Pechkin',"1");
+localStorage.setItem('RCBaing_Mail',"15");
+function WRMA1(){
+    
+    var WRI1=prompt("Введи:")
+    localStorage.setItem('WR1',WRI1)
+}
+function Write1(){
+    var WRI7T11=localStorage.getItem('WR1')
+    window.alert(WRI7T11);
+}
+function WRMA2(){
+    
+    var WRI2=prompt("Введи:")
+    localStorage.setItem('WR2',WRI2)
+}
+function Write2(){
+    var WRI7T12=localStorage.getItem('WR2')
+    window.alert(WRI7T12);
+}
+function WRMA3(){
+    
+    var WRI3=prompt("Введи:")
+    localStorage.setItem('WR2',WRI2)
+}
+function Write3(){
+    var WRI7T13=localStorage.getItem('WR3')
+    window.alert(WRI7T13);
+}
+function WRMA4(){
+    
+    var WRI4=prompt("Введи:")
+    localStorage.setItem('WR4',WRI4)
+}
+function Write4(){
+    var WRI7T14=localStorage.getItem('WR4')
+    window.alert(WRI7T14);
+}
+function Messange(){
+    var currentMessange=localStorage.getItem('Messange')
+    window.alert(currentMessange);
+}
+</script>

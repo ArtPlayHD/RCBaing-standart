@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Выбор пространства | RCBaing</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .page-title {
+      font-size: 2.4rem;
+      color: var(--accent);
+      margin: 0 0 8px 0;
+    }
+    .space-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 960px;
+      margin-bottom: 32px;
+    }
+    .space-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .space-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.25);
+    }
+    .space-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 24px rgba(255,107,129,0.2);
+    }
+    .space-name {
+      font-weight: 700;
+      margin: 12px 0 6px 0;
+    }
+    .space-desc {
+      color: #aaa;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .back-btn {
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1 class="page-title">🗺️ Выбор пространства</h1>
+    <p style="color:#aaa">Выбери, где находится твой «Уютный уголок»: это влияет на визуал и ощущения</p>
+  </div>
+
+  <div class="space-grid" id="spaceGrid">
+    <!-- Кабинет -->
+    <div class="space-card" data-space="study" data-bg="#151922" data-accent="#8bc3ff">
+      <div style="font-size:2rem; margin-bottom:12px;">📚</div>
+      <div class="space-name">Кабинет</div>
+      <div class="space-desc">Строгий, рабочий стиль. Холодные тона, полки с книгами, минимум лишнего.</div>
+    </div>
+
+    <!-- Веранда -->
+    <div class="space-card" data-space="veranda" data-bg="#2b2f3a" data-accent="#f5a66b">
+      <div style="font-size:2rem; margin-bottom:12px;">☀️</div>
+      <div class="space-name">Веранда</div>
+      <div class="space-desc">Тёплый свет, деревянные рейки, вид на сад. Спокойствие и уют.</div>
+    </div>
+
+    <!-- Пещера -->
+    <div class="space-card" data-space="cave" data-bg="#121418" data-accent="#a1856f">
+      <div style="font-size:2rem; margin-bottom:12px;">🪨</div>
+      <div class="space-name">Пещера</div>
+      <div class="space-desc">Каменные стены, приглушённый свет, ощущение защищённости и тишины.</div>
+    </div>
+
+    <!-- Библиотека -->
+    <div class="space-card" data-space="library" data-bg="#1a1e25" data-accent="#6c5b7b">
+      <div style="font-size:2rem; margin-bottom:12px;">📖</div>
+      <div class="space-name">Библиотека</div>
+      <div class="space-desc">Высокие стеллажи, мягкий свет, запах бумаги. Место для долгих размышлений.</div>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="history.back()">← Назад в меню</button>
+
+  <script>
+    const cards = document.querySelectorAll('.space-card');
+    let selectedCard = null;
+
+    function applySpace(card) {
+      if (selectedCard) selectedCard.classList.remove('selected');
+      card.classList.add('selected');
+      selectedCard = card;
+
+      const bg = card.dataset.bg;
+      const accent = card.dataset.accent;
+
+      // Сохраняем выбор
+      localStorage.setItem('rcbaing_space_mode', card.dataset.space);
+
+      // Здесь ты можешь вызывать свою JS-логику выбора пространства
+      console.log('Выбрано пространство:', card.dataset.space, 'Фон:', bg, 'Акцент:', accent);
+
+      // Пример: можно менять body.backgroundColor или передавать данные в другой модуль
+      document.body.style.backgroundColor = bg;
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => applySpace(card));
+    });
+
+    // Восстановление выбора при загрузке
+    const saved = localStorage.getItem('rcbaing_space_mode');
+    if (saved) {
+      const card = Array.from(cards).find(c => c.dataset.space === saved);
+      if (card) applySpace(card);
+    } else {
+      // По умолчанию выбираем первый
+      if (cards.length > 0) applySpace(cards[0]);
+    }
+  </script>
+</body>
+</html>

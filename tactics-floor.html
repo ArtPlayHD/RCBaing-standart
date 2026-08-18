@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Этаж тактики | RCBaing</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #ff6b81;
+      --text: #ffffff;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .floor-header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .floor-title {
+      font-size: 2.2rem;
+      color: var(--accent);
+    }
+    .tactics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .card-title {
+      color: var(--text);
+      margin: 0 0 12px 0;
+      font-weight: 700;
+    }
+    .priority-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .timer-display {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .action-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(255,107,129,0.06);
+    }
+    .back-btn {
+      margin-top: 30px;
+      padding: 12px 24px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .back-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="floor-header">
+    <h1 class="floor-title">🗺 Этаж тактики</h1>
+    <p style="color:#aaa">План фарма, приоритеты и быстрые действия без активных боёв</p>
+  </div>
+
+  <div class="tactics-grid">
+    <!-- Приоритеты фарма -->
+    <div class="card">
+      <h3 class="card-title">Приоритеты на сегодня</h3>
+      <div class="priority-item">
+        <span>Забрать ресурсы со склада</span>
+        <span style="color:var(--accent)">✅</span>
+      </div>
+      <div class="priority-item">
+        <span>Захват у противника (пассивный)</span>
+        <span style="color:var(--accent)">⏳</span>
+      </div>
+      <div class="priority-item">
+        <span>Ферма ресурсов: +20%</span>
+        <span style="color:var(--accent)">⚡</span>
+      </div>
+    </div>
+
+    <!-- Таймер фарма -->
+    <div class="card">
+      <h3 class="card-title">Таймер фарма</h3>
+      <p style="color:#aaa; margin-bottom:16px;">Следующий сбор ресурсов через:</p>
+      <div class="timer-display" id="farmTimer">02:17:43</div>
+      <button class="action-btn" onclick="alert('Таймер сброшен. Сбор ресурсов произведён.')">Сбросить таймер</button>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="card">
+      <h3 class="card-title">Быстрые действия</h3>
+      <button class="action-btn" onclick="alert('Захват ресурсов у противника запущен (без активных боёв).')">🎯 Захват у противника</button>
+      <button class="action-btn" onclick="alert('Ферма ресурсов активирована. Бонус +20% к сбору.')">🌱 Активировать ферму</button>
+      <button class="action-btn" onclick="location.href='warehouse-floor.html'">📦 Перейти к складу</button>
+    </div>
+  </div>
+
+  <button class="back-btn" onclick="history.back()">← Назад в меню</button>
+
+  <script>
+	var meat = 0;
+    // Простой таймер обратного отсчёта
+    let timeLeft = 2 * 60 * 60 + 17 * 60 + 43; // 2ч 17мин 43сек
+    const timerEl = document.getElementById('farmTimer');
+	
+	var meat = meat + 1000000;
+	localStorage.setItem('meat',meat)
+	
+
+    function updateTimer() {
+      const h = Math.floor(timeLeft / 3600);
+      const m = Math.floor((timeLeft % 3600) / 60);
+      const s = timeLeft % 60;
+
+      const hh = h < 10 ? '0'+h : h;
+      const mm = m < 10 ? '0'+m : m;
+      const ss = s < 10 ? '0'+s : s;
+
+      timerEl.textContent = `${hh}:${mm}:${ss}`;
+
+      if (timeLeft <= 0) {
+        timerEl.textContent = 'Готово!';
+        return;
+      }
+
+      timeLeft--;
+    }
+
+    setInterval(updateTimer, 1000);
+    updateTimer();
+  </script>
+  <script>
+  const savedMode = localStorage.getItem('rcbaing_lighting_mode');
+  if (savedMode) {
+    // Получаем цвет по режиму (нужно продублировать объект цветов)
+    const colors = {
+      'warm-evening': '#f5a66b',
+      'cold-study': '#8bc3ff',
+      'muted-cozy': '#6c5b7b',
+      'neon-accent': '#ff4757',
+      'moonlight': '#a7c9f5',
+      'soft-dawn': '#ffd7ba',
+	  'rcbaing': '#171717'
+    };
+    const color = colors[savedMode];
+    if (color) {
+      document.body.style.backgroundColor = color;
+    }
+  }
+</script>
+</body>
+</html>

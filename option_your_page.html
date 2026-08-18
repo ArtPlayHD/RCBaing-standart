@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Настройки — RCBaing</title>
+  <!-- Если у тебя есть свой style.css, оставь эту строку. Если нет — всё равно будет красиво благодаря стилям ниже -->
+  <link rel="stylesheet" type="text/css" href="style.css">
+  
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.15);
+      --accent: #ff6b81;
+      --text: #ffffff;
+      --muted: #a0a0b0;
+      --glass: rgba(255, 255, 255, 0.05);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* Тема Light */
+    body.theme-light {
+      --bg: #f0f2f5;
+      --panel: #ffffff;
+      --border: #ccc;
+      --accent: #d32f2f;
+      --text: #1a1a1a;
+      --muted: #555;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--accent);
+    }
+
+    .setting-block {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      box-sizing: border-box; /* Важно для отступов */
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(0,0,0,0.3);
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    #shareBtn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    #themeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      font-size: 1.2rem;
+      transition: transform 0.3s;
+    }
+    
+    #themeToggle:hover {
+      transform: scale(1.1);
+    }
+
+    .progress-container {
+      margin: 20px 0;
+      background: var(--glass);
+      border-radius: 20px;
+      overflow: hidden;
+      height: 10px;
+    }
+    
+    #progressFill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .status-active { background: #4caf50; color: white; }
+    .status-upgrading { background: #ff9800; color: white; }
+    .status-alliance { background: #2196f3; color: white; }
+    .status-offline { background: #9e9e9e; color: white; }
+
+    #saveDialog {
+      width: 90%;
+      max-width: 300px;
+      margin: auto;
+      border-radius: 12px;
+    }
+    
+    #saveDialog::backdrop {
+      background: rgba(0,0,0,0.7);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    #backBtn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 8px;
+    }
+    
+    #saveBtn {
+      flex: 1;
+      background: var(--accent);
+      border: none;
+      color: black;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+	.volume-slider {
+  width: 100%;
+  accent-color: var(--accent);
+  height: 8px;
+  cursor: pointer;
+}
+.volume-value {
+  text-align: right;
+  margin-top: 6px;
+  color: var(--muted, #aaa);
+  font-size: 0.85rem;
+}
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.toggle-input {
+  display: none;
+}
+.toggle-switch {
+  width: 40px;
+  height: 22px;
+  background: var(--border);
+  border-radius: 11px;
+  position: relative;
+  transition: background 0.2s;
+}
+.toggle-input:checked + .toggle-switch {
+  background: var(--accent);
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(18px);
+}
+.toggle-text {
+  color: var(--text);
+}
+.volume-setting {
+  position: relative;
+}
+
+.volume-slider {
+  width: 100%;
+  height: 6px;               /* толщина дорожки */
+  accent-color: var(--accent); /* цвет ползунка и активной части (работает в Chrome/Edge/Safari) */
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+/* Дополнительно: стилизация под Firefox, если нужно (через appearance) */
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--text);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.volume-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--text);
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-value {
+  text-align: right;
+  margin-top: 6px;
+  color: var(--muted, #a0a0b0);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+
+  </style>
+</head>
+<body id="Settings_body">
+
+  <div class="container">
+    <button id="themeToggle" title="Сменить тему">🌙</button>
+    
+    <h1>Настройки</h1>
+
+    <button id="shareBtn" onclick="shareProfile()">Поделиться профилем</button>
+
+    <!-- Прогресс заполнения -->
+    <p style="color: var(--muted); font-size: 0.9em;">Заполнение профиля:</p>
+    <div class="progress-container">
+      <div id="progressFill"></div>
+    </div>
+    <p id="progressText" style="text-align: center; color: var(--accent); font-weight: bold;">0%</p>
+
+    <!-- Выбор языка -->
+    <div class="setting-block">
+      <label><strong>Язык интерфейса:</strong></label>
+      <select id="langSelect">
+        <option value="ru">Русский</option>
+        <option value="en">English</option>
+      </select>
+      <p id="langStatus" style="font-size: 0.9em; color: #888; margin-top: 8px;"></p>
+    </div>
+
+    <!-- Тема оформления -->
+    <div class="setting-block">
+      <label>Тема оформления</label>
+      <select id="themeSelect">
+        <option value="light">Светлая</option>
+        <option value="dark">Тёмная</option>
+      </select>
+    </div>
+
+    <!-- Статус в Ant Legion -->
+    <div class="setting-block">
+      <label>Статус в Ant Legion</label>
+      <select id="antStatus">
+        <option value="active">В строю</option>
+        <option value="upgrading">На прокачке</option>
+        <option value="alliance">В альянсе</option>
+        <option value="offline">Оффлайн</option>
+      </select>
+      <span id="statusBadge" class="badge status-active">В строю</span>
+    </div>
+
+    <!-- Блок профиля -->
+    <div class="setting-block">
+      <label>Ваш ник (ArtPlayHD)</label>
+      <input type="text" id="setName" placeholder="Имя">
+    </div>
+
+    <div class="setting-block">
+      <label>Почта</label>
+      <input type="email" id="setMail" placeholder="Эл. почта">
+    </div>
+
+    <div class="setting-block">
+      <label>Телефон</label>
+      <input type="tel" id="setPH" placeholder="Номер телефона">
+    </div>
+
+    <!-- Блок Ant Legion -->
+    <div class="setting-block">
+      <label>Ник в Ant Legion</label>
+      <input type="text" id="setAntNick" placeholder="Например, ArtPlayHD">
+    </div>
+    
+    <div class="setting-block">
+      <label>Аватар (URL картинки):</label>
+      <input type="url" id="avatarUrl" placeholder="https://...">
+      <small style="color: var(--muted); display: block; margin-top: 5px;">Можно вставить ссылку на любую картинку</small>
+    </div>
+
+
+    <!-- Кнопки действий -->
+    <div class="actions">
+      <button id="backBtn" onclick="window.location.href='Your_page.html'">Назад</button>
+      <button id="saveBtn">Сохранить</button>
+    </div>
+
+    <!-- Попап: успешно сохранено -->
+    <dialog id="saveDialog">
+      <h2>Настройки сохранены!</h2>
+      <p>Твой «Милый дом» теперь ещё уютнее.</p>
+      <button onclick="document.getElementById('saveDialog').close()">Ok</button>
+    </dialog>
+  </div>
+
+<script>
+   
+  // --- Применение темы ---
+  function applyTheme(theme) {
+    document.body.classList.remove('theme-light', 'theme-dark');
+    document.body.classList.add('theme-' + theme);
+    localStorage.setItem('rcbaing_theme', theme);
+
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.title = theme === 'light' ? 'Тёмная тема' : 'Светлая тема';
+      btn.textContent = theme === 'light' ? '☀️' : '🌙';
+    }
+  }
+
+  const savedTheme = localStorage.getItem('rcbaing_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  // Кнопка переключения темы
+  const themeToggleBtn = document.getElementById('themeToggle');
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const current = localStorage.getItem('rcbaing_theme') || 'dark';
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+    });
+  }
+
+  // Синхронизация селекта темы
+  const themeSelect = document.getElementById('themeSelect');
+  if (themeSelect) {
+    themeSelect.value = savedTheme;
+    themeSelect.addEventListener('change', (e) => {
+      applyTheme(e.target.value);
+    });
+  }
+
+  // --- Язык ---
+  const langSelect = document.getElementById('langSelect');
+  const langStatus = document.getElementById('langStatus');
+
+  function updateLangStatus(lang) {
+    if (lang === 'ru') {
+      langStatus.textContent = 'Сейчас: русский';
+      langStatus.style.color = '#4caf50';
+    } else {
+      langStatus.textContent = 'Now: English';
+      langStatus.style.color = '#4caf50';
+    }
+  }
+
+  if (langSelect && langStatus) {
+    const savedLang = localStorage.getItem('rcbaing_lang') || 'ru';
+    langSelect.value = savedLang;
+    updateLangStatus(savedLang);
+
+    langSelect.addEventListener('change', (e) => {
+      const newLang = e.target.value;
+      localStorage.setItem('rcbaing_lang', newLang);
+      updateLangStatus(newLang);
+    });
+  }
+
+  // --- Статус Ant Legion ---
+  const statusMap = {
+    active: 'В строю',
+    upgrading: 'На прокачке',
+    alliance: 'В альянсе',
+    offline: 'Оффлайн'
+  };
+
+  const antStatusEl = document.getElementById('antStatus');
+  const badgeEl = document.getElementById('statusBadge');
+  if (antStatusEl && badgeEl) {
+    const savedAntStatus = localStorage.getItem('antStatus') || 'active';
+    antStatusEl.value = savedAntStatus;
+    badgeEl.textContent = statusMap[savedAntStatus];
+    badgeEl.className = 'badge status-' + savedAntStatus;
+
+    antStatusEl.addEventListener('change', (e) => {
+      const val = e.target.value;
+      localStorage.setItem('antStatus', val);
+      badgeEl.textContent = statusMap[val];
+      badgeEl.className = 'badge status-' + val;
+    });
+  }
+
+  // --- Загрузка данных в поля ---
+  const nameEl = document.getElementById('setName');
+  const mailEl = document.getElementById('setMail');
+  const phEl = document.getElementById('setPH');
+  const antNickEl = document.getElementById('setAntNick');
+
+  if (nameEl && mailEl && phEl && antNickEl) {
+    const name = localStorage.getItem('name') || '';
+    const mail = localStorage.getItem('mail') || '';
+    const ph = localStorage.getItem('PH') || '';
+    const antNick = localStorage.getItem('antLegionNick') || '';
+
+    nameEl.value = name;
+    mailEl.value = mail;
+    phEl.value = ph;
+    antNickEl.value = antNick;
+  }
+
+  // --- Прогресс-бар ---
+  function updateProgress() {
+    let filled = 0;
+    if (document.getElementById('setName')?.value.trim()) filled += 25;
+    if (document.getElementById('setMail')?.value.trim()) filled += 25;
+    if (document.getElementById('setPH')?.value.trim()) filled += 25;
+    if (document.getElementById('setAntNick')?.value.trim()) filled += 25;
+
+    const fillEl = document.getElementById('progressFill');
+    const textEl = document.getElementById('progressText');
+    if (fillEl && textEl) {
+      fillEl.style.width = filled + '%';
+      textEl.textContent = filled + '%';
+    }
+  }
+
+  [nameEl, mailEl, phEl, antNickEl].forEach(el => {
+    if (el) {
+      el.addEventListener('input', updateProgress);
+    }
+  });
+  updateProgress();
+
+  // --- Сохранение настроек ---
+  const saveBtn = document.getElementById('saveBtn');
+  if (saveBtn) {
+    saveBtn.addEventListener('click', () => {
+      const newName = nameEl?.value.trim() || '';
+      const newMail = mailEl?.value.trim() || '';
+      const newPH = phEl?.value.trim() || '';
+      const newAntNick = antNickEl?.value.trim() || '';
+
+      if (!newName || !newMail || !newPH) {
+        alert('Пожалуйста, заполните основные поля (имя, почта, телефон).');
+        return;
+      }
+
+      localStorage.setItem('name', newName);
+      localStorage.setItem('mail', newMail);
+      localStorage.setItem('PH', newPH);
+      localStorage.setItem('antLegionNick', newAntNick);
+
+      const dialog = document.getElementById('saveDialog');
+      if (dialog) {
+        dialog.showModal();
+      }
+    });
+  }
+
+  // --- Поделиться профилем ---
+  function shareProfile() {
+    const name = localStorage.getItem('name') || 'Гость';
+    const link = window.location.origin + '/Your_page.html?user=' + encodeURIComponent(name);
+    alert('Ссылка на ваш профиль: ' + link);
+  }
+ 
+</script>
+
